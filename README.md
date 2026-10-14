@@ -28,14 +28,14 @@ git push               # 再推上去
 ```
 
 ## 使用方法
-
+```
 cd D:\RiealProgram     # 1. 进入仓库目录
 git status             # 2. 看有什么改动（只读，随便敲）
 git add .              # 3. 把改动放进暂存区
 git commit -m "说明"    # 4. 提交到本地历史
 git pull --rebase      # 5. 先同步远程，避免被拒
 git push               # 6. 上传到 GitHub
-
+```
 ## 目录结构
 
 > 待补充。
