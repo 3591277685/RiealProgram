@@ -1,6 +1,6 @@
 # RiealProgram
 
-Rieal 的个人项目仓库。本地工作目录：`D:\RiealDeepseek`。
+Rieal 的个人项目仓库。
 
 ## 仓库信息
 
