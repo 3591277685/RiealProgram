@@ -1,7 +1,7 @@
 # AGENT — RiealProgram 项目记忆
 
 > 本文件记录本项目的背景、环境、已完成的操作、用户的要求与约定，供后续接手的 AI 助手（Agent）快速建立上下文。
-> 创建时间：2026-10-15　最后更新：2026-10-15（第三次更新：记录两个 AGENTS.md 的提交与推送）
+> 创建时间：2026-10-15　最后更新：2026-10-15（第四次更新：核对仓库现状、修正过期待办）
 
 ## 一、项目基本信息
 
@@ -40,6 +40,7 @@
 7. 创建项目记忆文件：先建为 AGENT/AGENTmemory.md，随后按用户要求改名为 AGENT/AGENT.md，并同步更新文件内的自我引用
 8. 配置 Codex 指令文件：全局 C:\Users\rieal\.codex\AGENTS.md 写入「把项目下所有对话用中文整理进 AGENT/AGENT.md」的规则；项目 D:\RiealProgram\AGENTS.md 写入本项目约定并指向 AGENT/AGENT.md
 9. 将 AGENT/ 记忆文件与 AGENTS.md 提交并推送到 GitHub，提交信息为「添加项目记忆文件与 AGENTS.md 约定」
+10. 用户询问「我们之前做了什么」，助手读取本文件、README.md、git log 与工作区状态后向用户汇报历史；核对中发现本文件第九节仍有「AGENT/ 与 AGENTS.md 尚未提交」的过期待办，实际已在提交 bd3d86d 完成，故一并修正
 
 ## 四、用户的要求与交流偏好
 
@@ -60,6 +61,7 @@
 - 特殊字符输入：反引号（grave accent，U+0060）在键盘左上角、Esc 下方、数字 1 左侧；Shift 加同一键是波浪号 ~；中文标点状态下可能打出全角 ｀，需先切到英文状态。Markdown 中三个反引号表示代码块
 - 不认识的字怎么打：直接复制粘贴 / Win + . 打开符号面板 / 运行 charmap 字符映射表
 - Codex 本地记忆文件在哪里：见第八节
+- 「我们之前做了什么」：见第三节时间线与本节速查，摘要为——搭建并推送了 RiealProgram 仓库（README + .gitignore）、把目录从 D:\RiealDeepseek 搬到 D:\RiealProgram、处理过一次远程 README 冲突、建立了项目记忆文件 AGENT/AGENT.md 与两级 AGENTS.md 指令
 
 ## 六、约定与注意事项
 
@@ -79,6 +81,8 @@
 - AGENTS.md：项目级 Codex 指令文件，写明本项目约定并指向本文件
 - AGENT/AGENT.md：本文件，项目记忆
 
+核对当时（2026-10-15）的状态：工作区干净，main 与 origin/main 同步，共 5 个提交（最新 bd3d86d）。核对后本文件随之更新，本地多出一个提交（提交信息「更新项目记忆：核对仓库现状并修正过期待办」），因当时连不上 GitHub 尚未推送，推送后本地与远程才会再次一致。远程地址为 origin = https://github.com/3591277685/RiealProgram.git
+
 ## 八、Codex 自身记忆机制（2026-10-15 查证）
 
 - 全局指令文件：C:\Users\rieal\.codex\AGENTS.md。官方说明：Codex 在该目录先读 AGENTS.override.md，没有才读 AGENTS.md，且只取该层第一个非空文件（空文件等于没写）。本次已写入「把项目下的对话用中文整理进 AGENT/AGENT.md」的规则
@@ -92,4 +96,4 @@
 - 补齐 README 的「目录结构」
 - 可选：配置一键同步脚本（sync.ps1）或 post-commit 自动 push 钩子
 - 本文件应随重要操作持续更新，新记录追加到时间线
-- AGENT/ 与 AGENTS.md 尚未提交到 git（当前为 untracked），需要 add / commit / push
+- ~~AGENT/ 与 AGENTS.md 尚未提交到 git~~ 已完成：提交 bd3d86d 并推送（2026-10-15 核对确认）
