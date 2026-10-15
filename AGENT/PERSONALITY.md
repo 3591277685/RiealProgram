@@ -88,6 +88,7 @@
 | 15 | 在输入框 @ 了 Slack 插件（带出默认提示「Summarize unread activity, draft replies, or prepare updates」） | 查 logs_2.sqlite 定位 `AuthRequired` → `codex mcp list` → `codex mcp login slack` 授权后工具当场挂载；读完 6 个会话，均无未读、无待回 |
 | 16 | 「不用这个插件了，我取消使用，因为要钱」 | 不劝留直接执行停用并记录；指出收费来自 Slack 试用到期（11/12）而非 Codex 侧；本地 OAuth 凭证可清理，待确认 |
 | 17 | 「记忆模块会不会对新创建的对话造成上下文影响」 | 量出三条进上下文的路径与占用（记忆库为空，实际≈0）；给出 `/memories` 与 config.toml 控制方式，建议给 AGENT.md 做归档 |
+| 18 | 「归档后会将AGENT.md的部分记录内容给删除吗」 | 说明归档是搬迁不是删除：全文进归档文件、旧版本留在 git 历史、主文件另有摘要与索引；并写明只有日期小节（超 3 天）与互动节点（超 30 条或跨月）会被搬，主题章节永不归档 |
 
 ### 用户原话采样（保留语气，供迁移时还原对话习惯）
 
