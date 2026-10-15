@@ -1,7 +1,7 @@
 # AGENT — RiealProgram 项目记忆
 
 > 本文件记录本项目的背景、环境、已完成的操作、用户的要求与约定，供后续接手的 AI 助手（Agent）快速建立上下文。
-> 创建时间：2026-10-15　最后更新：2026-10-15（第二十七次更新：补齐 README 目录结构，清掉对应待办）
+> 创建时间：2026-10-15　最后更新：2026-10-15（第二十八次更新：补齐 README 目录结构、记录 QQ x64 下载与 winget 取证手法）
 
 ## 每日记录（按日期汇总）
 
@@ -63,6 +63,8 @@
      - 验证边界：注入侧已在本会话运行时上下文里看到实效；设置界面本身需用户重启 DSH 后在界面上确认（`/plugins/?…` 的客户端 bundle 路由在临时 web profile 里对官方包同样 404，无法在沙箱内自证）。
 
 30. 补齐 README「目录结构」（2026/10/15 晚段）。用户先问「README 的目录结构什么内容没补」，核实该节此前只有一行「> 待补充。」——是整节空缺，不是缺某一部分。按 `git ls-files` 的实际清单写入两段：① 代码块形式的文件树（README.md、AGENTS.md、.gitignore、AGENT/ 下三个文件、dsh-global-agent-md/ 全部文件含 .probe/）；② 表格形式的「文件说明」（每个路径一句话作用）。同时清掉本文件与第九节里对应的待办。随后用户说「推送吧」，即将自 a465311 之后累积的 12 个本地提交一并推送（`git pull --rebase` 显示已是最新，直接 `git push` 成功：a465311..99ed932）。
+
+31. 解答「QQ x64 版本在哪里下载」（2026/10/15，非项目话题）。取证路径：① 抓官网 https://im.qq.com/pcqq/index.shtml（200，但正文由 JS 渲染，页面本身拿不到直链）；② 顺手抓了 https://im.qq.com/download，发现这个「下载中心」页面内容停在 2023 年初（QQ Windows 版 9.7.1、Android 8.9.28），是过期入口，据此提醒用户别从那下；③ 用第三方归档页 https://blog.nuoyo.cn/4393.html 拿到官方 CDN 的 x86/x64 双直链示例（9.9.18），确认新版 QQ 安装包确实区分架构、文件名带 `_x64_`；④ 决定性证据来自本机 `winget show`：`Tencent.QQ.NT` 9.9.33.52230 的 Installer Url 即官方 x64 包（`qqdl.gtimg.cn/.../QQ_9.9.33_260813_x64_01.exe`）含 SHA256，`Tencent.QQ` 9.7.23（经典版）包名无架构后缀、为 32 位。结论与四条坑已写入第五节。手法小结：查软件官方下载地址时，`winget show <包 id>` 能直接读出官方 URL、SHA256、发布日期，比翻网页/第三方站可靠得多。
 
 
 - 提交已经推送成功后不要再 `git commit --amend`（会与远程分叉导致 non-fast-forward）；需要改就再加一个提交，或用 `git fetch` + `git reset --soft origin/main` 把改动接到远程提交之上。
@@ -183,6 +185,7 @@
 - 「Codex 语言选了简体中文但大部分是英文」：设置本身没问题（`config.toml` 里 `localeOverride = "zh-CN"`，应用内有 `zh-cn → zh-Hans` 映射和「简体中文」标签）。界面文案走逐条查表，缺哪个词的译文就回落英文原文，所以中英混排是机制决定的；语言包是按语言拆分的懒加载 JS 块（zh 块约 2.5MB、约 3 万条），加载失败会整体变英文。排查：完全退出应用（含后台进程）再启动 → 设置里把语言切到其他再切回简体中文。另外有一类内容本来就不翻译：模型名、命令与路径、日志与报错、插件与技能的名称描述、以及模型生成的所有文字。想定位具体某处是"没翻译"还是"没生效"，可截图后到 app.asar 里查对应 key 有无中文译文
 - 「Codex 语言选了简体中文但界面仍是英文」（2026/10/15 复核）：不是设置错、也不是官方没翻译——中文语言包（2.5MB）确实在，且含界面上那些英文的对应译文；问题是文案表没被加载。已排除：外部改 config.toml 无效（应用不监听文件，只认应用内设置变更）。最可能的成因是刷新逻辑只挂在「语言值发生变化」的事件上，而值一直是 zh-CN 没变过。可行修法（按顺序）：① 在应用内把语言先切成别的（如 English），确认界面变化后再切回简体中文，强制触发一次刷新；② 完全退出应用（含后台进程）再启动；③ 若仍为英文，则是本版（26.1007.9446.0）的打包/加载缺陷，考虑更新或重装应用。排查用到的取证手法：沙箱内截屏无桌面句柄需提权执行 `CopyFromScreen`；解析 asar 头部（前 16 字节 + JSON 头）可列出随包文件及其 size/offset，从而确认语言包是否存在
 - 「Codex 是开源吗」（2026/10/15）：部分开源。终端版（openai/codex，Rust，Apache-2.0）及 codex-plugin-cc / codex-security / codex-action / tunnel-client 等开源；`openai/skills`、`openai/codex-universal`、`openai/role-specific-plugins` 未标许可证。桌面应用（本机 ChatGPT.exe + app.asar，无源码、仅第三方组件声明）、云端 Codex、模型权重均不开源，因此界面汉化只能等官方修。核对路径：官方文档域名 403，改用 GitHub API（api.github.com/repos/openai/codex、/contents/、search?q=org:openai+codex）
+- 「QQ x64 版本在哪里下载」（2026/10/15）：QQ 没有单独的 x64 专区，新版 QQ（NT 架构）的安装包本身就是 64 位。可靠入口两个——官网 https://im.qq.com/pcqq/index.shtml（Windows 版页，当前 9.9.33），或 `winget install Tencent.QQ.NT`（9.9.33.52230）。x64 直链（取自 winget 清单 `Tencent.QQ.NT`）：`https://qqdl.gtimg.cn/qqfile/QQNT/9.9.33/release/497e2f1f/QQ_9.9.33_260813_x64_01.exe`，SHA256 `b25c0d3ce9df764074a9118d0ded927e1b2d7ebf60e306112e8df18a040ec492`，文件名里的 `_x64_` 是架构标记、`260813` 是发布日。注意：① `https://im.qq.com/download`（下载中心）页面内容停在 2023 年初（显示 QQ Windows 版 9.7.1），给的是经典版包，别从那下；② 经典版 `Tencent.QQ` 9.7.23 的包名 `QQ9.7.23.29392.exe` 无架构后缀，是 32 位程序，没有 x64 包；③ 旧版 NT 直链有规律 `dldir1.qq.com/qqfile/qq/QQNT/Windows/QQ_<版本>_<日期>_x64_01.exe`（把 `x64` 换成 `x86` 即 32 位包，如 `QQ_9.9.18_250307_x64_01.exe`），新版换到 `qqdl.gtimg.cn` 且路径含随机 hash，拼不出来；④ 验证方式：任务管理器 → 详细信息里 `QQ.exe` 带「(32 位)」即为 32 位版。取证手法：本机 `winget show Tencent.QQ.NT` / `winget show Tencent.QQ` 可直接读出官方安装器 URL、SHA256 与发布日期，比翻网页可靠
 - 「dsh / DeepSeek Harness 开源吗」（2026/10/15）：开源，MIT。仓库 `deepseek-ai/deepseek-harness`（TypeScript，约 25 万 star），CLI 名 `dsh`，发布为 `dsh-v0.2.1-alpha.x`，仍在 alpha 阶段；文档站在 deepseek-harness.github.io，DeepSeek 官方文档的 Agent Integrations 里外链指过去。注意区分：harness 是开源的工具/框架，模型能力仍来自所调用的模型服务
 ## 六、约定与注意事项
 
