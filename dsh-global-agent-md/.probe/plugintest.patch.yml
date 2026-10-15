@@ -1,0 +1,4 @@
+# 测试 profile 的补丁层：只挂实验插件，不影响 desktop profile。
+- insert:
+    - id: auth-probe
+      name: 'D:/RiealProgram/dsh-global-agent-md/.probe/auth-probe.js'

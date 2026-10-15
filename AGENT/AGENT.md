@@ -56,6 +56,12 @@
      - 踩过的两个坑：① 插件目录缺少 `node_modules`，`@deepseek-ai/schemastery` 解析不到，loader 报 `failed to import`（该包在 npm 上公开，装 `3.18.5-alpha.2` 与 dsh 版本线对齐即可）；② `systemPrompt` 的 provider 契约是**同步** `() => string`，写成 `async` 会返回 Promise 污染提示词，已改为同步读盘。
      - 验证方式：`dsh --dump-config` 确认层组合；自检脚本用假 ctx 抓取注册的 context 定义并调用 provider，确认返回类型、字节数、缓存稳定性与截断行为。`desktop` profile 被 Electron 独占，CLI 不能 dump，最终确认需重启应用。
 
+29b. 给上述插件加「设置界面」（2026/10/15，用户要求：设置界面添加一个「全局要求」的设置项，可随时修改 AGENT.md）。产物升到 0.2.0，新增浏览器半边 `client/client.js`：手写成 `window.__ModuleLoader__.load({ id, factory })` 形式（外壳只服务构建好的 bundle、不替插件编译），在 `settings.plugins.tab` / `settings.section` 注册一页「全局要求」，文本框 + 保存/重载/放弃改动 + 409 乐观锁；宿主半边新增三条同源路由 `/global-agent-md/api/{state,save,reload}`。在独立 profile 实测：`state`/`save`/`reload` 按预期工作（200 / 400 缺字段 / 409 版本冲突分支已实现）。
+     - 关键坑 1：`webServer` 必须写进 `inject`。只在 `apply` 里 `ctx.get('webServer')` 探测，会在服务就绪前拿到 `undefined` 并提前 return——表现为**注入正常但设置路由 404**。
+     - 关键坑 2：`ctx.webServer.register` 的 handler 是 Node 原生 `(req, res)`，必须自己 `res.writeHead/res.end`；返回对象形式不会结束响应，浏览器侧一直挂起（表现为超时）。参照 `dshmarket/lib/routes.js` 的 `{ kind: 'exact', path, handler }`。
+     - 关键坑 3（自己造成、已补救）：在测试 profile 上实测 save 接口时，把**真实全局指令文件** `C:\Users\rieal\.dsh\AGENT.md` 覆盖成了测试文本，随后按用户原话逐字还原（4247 字节，与覆盖前一致）。教训：对「指向用户真实数据的接口」做写测试，必须先把目标切到临时文件，绝不在真实路径上试写。
+     - 验证边界：注入侧已在本会话运行时上下文里看到实效；设置界面本身需用户重启 DSH 后在界面上确认（`/plugins/?…` 的客户端 bundle 路由在临时 web profile 里对官方包同样 404，无法在沙箱内自证）。
+
 
 - 提交已经推送成功后不要再 `git commit --amend`（会与远程分叉导致 non-fast-forward）；需要改就再加一个提交，或用 `git fetch` + `git reset --soft origin/main` 把改动接到远程提交之上。
 - 推送失败多为网络瞬时问题（Connection was reset / Could not connect to server），隔一会儿重试即可。
@@ -64,6 +70,7 @@
 - 上下文将满时应用会自动压缩：界面出现分隔线「上下文已自动压缩」（英文 Context automatically compacted），也可手动触发（「上下文已压缩」）；压缩期间显示「正在压缩上下文（可能需要几分钟）」，中断则显示「压缩已中断」。压缩后旧内容被摘要替代，细节可能丢失。
 - Slack 插件（slack@openai-api-curated）是 HTTP MCP 服务 https://mcp.slack.com/mcp，必须完成 OAuth 授权后会话里才会有工具。判定与修复路径：`codex mcp list` 看注册情况与 Auth 状态（注册了但未授权时显示 Auth: Unknown）→ `codex mcp login slack` 走授权流程 → 授权成功后工具集即时挂载，不必重开对话。注意 `codex mcp list` 需要 CODEX_HOME 能解析（沙箱里先设好环境变量），否则报「Could not find home directory」。
 - 插件「已启用」或 MCP server「已配置」≠ 当前会话有工具：连接失败时工具根本不会出现在工具清单里，应先查证据（应用日志库 `C:\Users\rieal\.codex\logs_2.sqlite` 可直接 rg 文本，含 MCP 启动错误）再动手。
+- **写测试绝不能指向真实数据**（2026/10/15 教训）：为验证插件的 save 接口，我在独立 profile 上写了「测试内容」，但接口指向的是用户真实的全局指令文件 `C:\Users\rieal\.dsh\AGENT.md`，直接把原文覆盖掉了。赔救方式是按用户原话逐字还原并核对字节数（4247B 与覆盖前一致）。正确做法：写测试前先把目标（插件的 `path` 配置）切到临时文件，或干脆只测读路径。
 - DSH 里想改「全局指令文件」的行为，先分清两层：全局那份文件名写死（`AGENT.md` 无效、`AGENTS.md` 有效），项目层靠 `instructionFileCandidates` 配置。要自定义全局文件名只能写插件。
 - 给 DSH 写插件时，`systemPrompt` 的 `section`/`context` 的 provider 必须是同步函数（契约 `() => string`）；返回 Promise 不会报错，只会把 `[object Promise]` 塞进提示词，属于最难查的一类坑。
 - 插件目录若用 `link:` 安装，loader 从 profile 解析包名、从插件目录解析其自身依赖，所以**插件自己的 `node_modules` 必须在**（`pnpm install`），否则表现为 `dsh: warning: N entry did not activate` + `failed to import`。

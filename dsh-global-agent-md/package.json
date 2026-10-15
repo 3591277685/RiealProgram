@@ -1,14 +1,20 @@
 {
   "name": "dsh-global-agent-md",
-  "version": "0.1.0",
-  "description": "把程序目录下的全局 AGENT.md 注入 DSH 每一次请求：无论会话在哪个工作区，都先读到这份全局指令（文件名、路径、注入顺序可配置）",
+  "version": "0.2.0",
+  "description": "把程序目录下的全局 AGENT.md 注入 DSH 每一次请求，并在「设置 → 插件 → 全局要求」里提供编辑界面",
   "type": "module",
   "main": "index.js",
   "files": [
     "index.js",
+    "client",
     "cordis.patch.yml",
     "README.md"
   ],
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client/client.js",
+    "./package.json": "./package.json"
+  },
   "keywords": [
     "dsh",
     "dsh-plugin",
@@ -20,6 +26,13 @@
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-settings"
+      ]
     }
   },
   "dependencies": {
