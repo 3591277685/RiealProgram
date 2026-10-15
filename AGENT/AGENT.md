@@ -13,7 +13,7 @@
 | 可见性 | 公开（Public） |
 | 本地目录 | D:\RiealProgram |
 | 默认分支 | main |
-| 当前最新提交 | 37a9155「改变布局」 |
+| 最新提交 | 以 `git log --oneline -1` 为准；截至 2026-10-15 为记忆文件更新类提交 |
 
 提交身份（仓库本地配置与全局配置均已设置）：
 
@@ -40,7 +40,7 @@
 7. 创建项目记忆文件：先建为 AGENT/AGENTmemory.md，随后按用户要求改名为 AGENT/AGENT.md，并同步更新文件内的自我引用
 8. 配置 Codex 指令文件：全局 C:\Users\rieal\.codex\AGENTS.md 写入「把项目下所有对话用中文整理进 AGENT/AGENT.md」的规则；项目 D:\RiealProgram\AGENTS.md 写入本项目约定并指向 AGENT/AGENT.md
 9. 将 AGENT/ 记忆文件与 AGENTS.md 提交并推送到 GitHub，提交信息为「添加项目记忆文件与 AGENTS.md 约定」
-10. 用户询问「我们之前做了什么」，助手读取本文件、README.md、git log 与工作区状态后向用户汇报历史；核对中发现本文件第九节仍有「AGENT/ 与 AGENTS.md 尚未提交」的过期待办，实际已在提交 bd3d86d 完成，故一并修正。随后用户询问工作区变更是否正确，助手核对后再次校订本文件措辞。本次更新推送时一度连不上 GitHub（Connection was reset / Could not connect to server），稍后重试推送成功
+10. 用户询问「我们之前做了什么」，助手读取本文件、README.md、git log 与工作区状态后向用户汇报历史；核对中发现本文件第九节仍有「AGENT/ 与 AGENTS.md 尚未提交」的过期待办（实际已在提交 bd3d86d 完成），以及第一节「当前最新提交」字段停留在 37a9155，均一并修正。随后用户询问工作区变更是否正确，助手核对后再次校订本文件措辞。本次更新推送时一度连不上 GitHub（Connection was reset / Could not connect to server），重试后成功；中途一次 amend 重写了已推送的提交导致 non-fast-forward，用 `git reset --soft origin/main` 把改动接到远程提交之上解决（未丢失任何内容）
 
 ## 四、用户的要求与交流偏好
 
@@ -81,7 +81,7 @@
 - AGENTS.md：项目级 Codex 指令文件，写明本项目约定并指向本文件
 - AGENT/AGENT.md：本文件，项目记忆
 
-截至 2026-10-15 核对：仓库共 5 个提交（最新 bd3d86d），工作区干净，main 与 origin/main 同步。核对后本文件的第三节、第五节、第七节、第九节随之更新，提交信息为「更新项目记忆：核对仓库现状并修正过期待办」，已推送成功（具体哈希以 git log 为准）。远程地址为 origin = https://github.com/3591277685/RiealProgram.git
+截至 2026-10-15 核对的结论：核对前工作区干净、main 与 origin/main 同步，共 5 个提交（最新 bd3d86d「添加项目记忆文件与 AGENTS.md 约定」）。核对后本文件的第三节、第五节、第七节、第九节已更新并推送成功；提交数量与最新哈希请以 `git log` 为准。远程地址为 origin = https://github.com/3591277685/RiealProgram.git
 
 ## 八、Codex 自身记忆机制（2026-10-15 查证）
 
