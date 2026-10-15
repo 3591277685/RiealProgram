@@ -1,0 +1,11 @@
+# dsh bundle patch：把本插件插入 profile 的层栈。
+# 行里的 name 用包名引用（Node 才能解析到已安装的代码）。
+- insert:
+    - id: global-agent-md
+      name: 'dsh-global-agent-md'
+      config:
+        # 全局指令文件路径。留空字符串（path: ''）即停用本插件。
+        path: !!js process.env.DSH_GLOBAL_AGENT_MD || dshHomePath('AGENT.md')
+        # 注入顺序：数值越大越靠后（越贴近本步请求）。可自由调整。
+        order: 9000
+        maxBytes: 262144

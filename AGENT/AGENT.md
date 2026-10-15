@@ -1,7 +1,7 @@
 # AGENT — RiealProgram 项目记忆
 
 > 本文件记录本项目的背景、环境、已完成的操作、用户的要求与约定，供后续接手的 AI 助手（Agent）快速建立上下文。
-> 创建时间：2026-10-15　最后更新：2026-10-15（第十九次更新：加入「不报备」风格约定）
+> 创建时间：2026-10-15　最后更新：2026-10-15（第二十六次更新：新增第九节「DSH 自身机制」，记录全局 AGENT.md 插件）
 
 ## 每日记录（按日期汇总）
 
@@ -40,7 +40,22 @@
 
 24. 用户反馈风格问题（2026/10/15）：「后续对话除非我问你，不用出现这类关于人格或记忆、推送等的提醒……显得很机械」，并附截图指出我回复结尾的"已记进记忆文件与人格档案（节点 18）""本地提交 c625e3e，未推送"这类内容。处理：把「不报备」列为人格关键词，写进 `PERSONALITY.md` 的说话方式收尾条与用户偏好，并同步写进全局指令与项目 AGENTS.md 的交流约定；此后记忆、提交、推送照常静默执行，不写进回复。
 
-**结论与教训**
+25. 解答「Codex UI language 选了简体中文但大部分变成英文」：核对 config.toml（`[desktop] localeOverride = "zh-CN"`）与应用本体——语言包按语言分块懒加载（`zh-CN-*.js` 约 2.5MB），应用内部有 `zh-cn → zh-Hans` 映射与「简体中文」选项标签，说明设置值被支持；抽查「设置/主题/用量/任务」等区域均有中文译文（注意该应用用「新任务」而非「新建对话」）。结论：界面是逐条查表、缺译文回落英文，所以中英混排是必然；大面积英文更像语言包未生效，排查顺序为完全退出重启 → 语言切走再切回。
+
+26. 界面语言问题继续排查（2026/10/15）：截屏确认应用外壳（菜单栏 File/Edit/View/Help、侧栏 New chat / Scheduled / Plugins / Explore / Projects、按钮 Undo、View changes、Ask for approval）为英文，但同屏的时长显示「1分钟24秒」是中文——说明 locale 已生效（Intl 格式化跟着走），只是**文案表没被加载**。逐项验证：① `config.toml` 的 `localeOverride = "zh-CN"` 合法（应用内有 `zh-cn → zh-Hans` 映射，语言列表里该值为「简体中文」）；② 解析 app.asar 头部，`zh-CN.json`（13.8KB）与 `zh-CN-3727db380fd4.js`（2.5MB）确实随包发布，且该块内含「新对话×4、已编辑×21、等待批准×3、外观×12」等正是界面上那些英文的对应译文，而 `zh-Hans-*.js`（160KB）里一个都没有；③ 外部修改 `config.toml`（试写 ja-JP 再改回 zh-CN，已备份/已还原）界面无任何变化，说明应用不监听该文件、只认应用内的设置变更事件。据此推断：启动时文案表未加载，而刷新逻辑挂在「localeOverride 值发生变化」事件上，用户的值一直是 zh-CN、从未变化，事件不触发 → 界面停在英文。
+
+27. 解答「Codex 是开源吗」（2026/10/15）：部分开源。用手取证：OpenAI 官方文档域名从本机 curl 仍返回 403，改用 GitHub API 核对。`openai/codex` 为 Apache-2.0、Rust、129,334 star，最近推送时间为当天，顶层含 `codex-cli/`、`codex-rs/`、`sdk/`、`docs/`、`LICENSE`、`NOTICE`；组织内相关仓库还有 codex-plugin-cc、codex-security、codex-action、tunnel-client、role-specific-plugins（前四个为 Apache-2.0），而 `openai/skills`、`openai/codex-universal`、`openai/role-specific-plugins` 未标注许可证。桌面应用侧：本机安装目录只有编译产物（ChatGPT.exe、app.asar 等），无源码，唯一的许可证文件是 THIRD_PARTY_NOTICES.txt（第三方组件声明），组织内也无桌面端源码仓库。结论：终端 CLI 与部分周边工具开源，桌面图形应用、云端服务与模型本身不开源——这也解释了界面汉化问题只能等官方修。
+
+28. 解答「dsh harness 是开源吗」（2026/10/15）：是。DeepSeek 官方文档侧栏的「DeepSeek Harness」指向 `deepseek-harness.github.io`，其源码仓库为 `deepseek-ai/deepseek-harness`：MIT 许可证、TypeScript、250,118 star / 30,075 fork、创建于 2026/08/13、最近推送 2026/10/14、主页 deepseek.com/harness、描述「Everything is a Plugin.」；发布 tag 为 `dsh-v0.2.1-alpha.3`（2026/10/14）等，说明 CLI 名就叫 `dsh`，目前处于 0.2.1-alpha 阶段。
+
+29. 编写并安装「全局 AGENT.md」DSH 插件（2026/10/15，本日末段）。用户要求：写一个插件，让全局要求放在程序自己的目录里，且无论在哪个工作区、每次对话都优先读取。查证后确认关键事实——DSH 内置的 `@deepseek-ai/dsh-agent-instructions` 确实每次请求前加载全局指令，但全局那份文件名在源码里写死为 `AGENTS.md`（`USER_GLOBAL_FILE`，探测 `$DSH_HOME/AGENTS.md` 与 `~/.agents/AGENTS.md`），配置项 `instructionFileCandidates` 只管项目目录，所以 `AGENT.md` 这个文件名必须由插件自己读。用户选择走插件路线，并提供了全局要求全文（记忆文件、日期标注、人格档案、提交推送节奏、交流）。
+     - 产物：`D:\RiealProgram\dsh-global-agent-md\`（`index.js` 插件入口、`cordis.patch.yml` bundle 层、`package.json`、`README.md`，另有 `.probe\` 自检脚本）。
+     - 原理：用官方 `ctx.systemPrompt.context()` 注册运行时上下文，provider 每次组装请求时求值，按 `mtime + size` 缓存，超限按 UTF-8 边界截断；注入为 `<global-instructions source="…">`。
+     - 全局指令文件：`C:\Users\rieal\.dsh\AGENT.md`（用户给的全文，未删改）。
+     - 安装：`pnpm add link:D:/RiealProgram/dsh-global-agent-md` 装进 `C:\Users\rieal\.dsh\profiles\desktop`，再把 `dsh-global-agent-md` 追加进该 profile `package.json` 的 `dsh.profile.bundles`；改动前已备份 `package.json.bak`、`cordis.patch.yml.bak`。**重启 DSH 后才会在常驻进程里加载**；重启前的验证只能到「层组合正确 + 插件自检通过」这一步。
+     - 踩过的两个坑：① 插件目录缺少 `node_modules`，`@deepseek-ai/schemastery` 解析不到，loader 报 `failed to import`（该包在 npm 上公开，装 `3.18.5-alpha.2` 与 dsh 版本线对齐即可）；② `systemPrompt` 的 provider 契约是**同步** `() => string`，写成 `async` 会返回 Promise 污染提示词，已改为同步读盘。
+     - 验证方式：`dsh --dump-config` 确认层组合；自检脚本用假 ctx 抓取注册的 context 定义并调用 provider，确认返回类型、字节数、缓存稳定性与截断行为。`desktop` profile 被 Electron 独占，CLI 不能 dump，最终确认需重启应用。
+
 
 - 提交已经推送成功后不要再 `git commit --amend`（会与远程分叉导致 non-fast-forward）；需要改就再加一个提交，或用 `git fetch` + `git reset --soft origin/main` 把改动接到远程提交之上。
 - 推送失败多为网络瞬时问题（Connection was reset / Could not connect to server），隔一会儿重试即可。
@@ -49,6 +64,10 @@
 - 上下文将满时应用会自动压缩：界面出现分隔线「上下文已自动压缩」（英文 Context automatically compacted），也可手动触发（「上下文已压缩」）；压缩期间显示「正在压缩上下文（可能需要几分钟）」，中断则显示「压缩已中断」。压缩后旧内容被摘要替代，细节可能丢失。
 - Slack 插件（slack@openai-api-curated）是 HTTP MCP 服务 https://mcp.slack.com/mcp，必须完成 OAuth 授权后会话里才会有工具。判定与修复路径：`codex mcp list` 看注册情况与 Auth 状态（注册了但未授权时显示 Auth: Unknown）→ `codex mcp login slack` 走授权流程 → 授权成功后工具集即时挂载，不必重开对话。注意 `codex mcp list` 需要 CODEX_HOME 能解析（沙箱里先设好环境变量），否则报「Could not find home directory」。
 - 插件「已启用」或 MCP server「已配置」≠ 当前会话有工具：连接失败时工具根本不会出现在工具清单里，应先查证据（应用日志库 `C:\Users\rieal\.codex\logs_2.sqlite` 可直接 rg 文本，含 MCP 启动错误）再动手。
+- DSH 里想改「全局指令文件」的行为，先分清两层：全局那份文件名写死（`AGENT.md` 无效、`AGENTS.md` 有效），项目层靠 `instructionFileCandidates` 配置。要自定义全局文件名只能写插件。
+- 给 DSH 写插件时，`systemPrompt` 的 `section`/`context` 的 provider 必须是同步函数（契约 `() => string`）；返回 Promise 不会报错，只会把 `[object Promise]` 塞进提示词，属于最难查的一类坑。
+- 插件目录若用 `link:` 安装，loader 从 profile 解析包名、从插件目录解析其自身依赖，所以**插件自己的 `node_modules` 必须在**（`pnpm install`），否则表现为 `dsh: warning: N entry did not activate` + `failed to import`。
+- DSH 启动是「全有全无」：一个插件 `apply` 抛错整个进程起不来。所以改 profile 前先备份、先在独立 profile（`dsh <name> --from-default-profile web`）里验证。
 
 **助手人格与说话方式（2026/10/15）**
 
@@ -66,6 +85,8 @@
 
 - README 的「目录结构」一节仍待补充
 - 可选：配置一键同步脚本 sync.ps1 或 post-commit 自动 push 钩子
+- 待用户重启 DSH 后确认 `dsh-global-agent-md` 插件在常驻进程里正常挂载（D 盘插件、desktop profile 的 `dsh.profile.bundles` 已登记）
+- 全局指令文件 `C:\Users\rieal\.dsh\AGENT.md` 与项目内的 `AGENT/AGENT.md`、`AGENTS.md` 口径保持一致（全局文件是用户给的原文，项目文件只保留指针与摘要，改动时两边同步）
 
 ## 推送状态（每次对话开始核对）
 
@@ -151,6 +172,10 @@
 - 「Slack 插件为什么不能用 / 怎么接上」：插件本身已启用，但 MCP 服务要求 OAuth，未授权时工具不会挂载。修复命令是 `codex mcp login slack`；授权后当前对话就能用，不用新开对话
 - 「记忆模块会不会对新创建的对话造成上下文影响」：会，但分三条路径。① 应用记忆模块（memories）开启时会把它生成的记忆注入新对话，当前记忆库 stage1_outputs 为 0 行，所以实际占用≈0；② 全局与项目 AGENTS.md 文档每次新对话都自动进上下文，粗估约 1.0k + 1.1k token；③ `AGENT/AGENT.md`（约 8.1k token）与 `AGENT/PERSONALITY.md`（约 3.6k token）**不会自动注入**，只有识按约定去读才占上下文。三者合计约 1.4%，但 AGENT.md 会随每日记录持续变大，建议做归档
 - 「归档会把 AGENT.md 的记录删掉吗」：不会删，只是把内容从主文件搬到归档文件——归档文件里是逐字原文（本次核对：搬走的 10 条一条不少），git 历史里也留有搬走前的版本（如 `git show c51b6e0:AGENT/AGENT.md`），主文件另外留了摘要与索引。代价是被搬走的内容不会自动进入新对话的上下文，需要时得顺着索引去读归档文件；因此主题章节（项目信息、约定、待办等）永不归档，关键条款始终留在主文件
+- 「Codex 语言选了简体中文但大部分是英文」：设置本身没问题（`config.toml` 里 `localeOverride = "zh-CN"`，应用内有 `zh-cn → zh-Hans` 映射和「简体中文」标签）。界面文案走逐条查表，缺哪个词的译文就回落英文原文，所以中英混排是机制决定的；语言包是按语言拆分的懒加载 JS 块（zh 块约 2.5MB、约 3 万条），加载失败会整体变英文。排查：完全退出应用（含后台进程）再启动 → 设置里把语言切到其他再切回简体中文。另外有一类内容本来就不翻译：模型名、命令与路径、日志与报错、插件与技能的名称描述、以及模型生成的所有文字。想定位具体某处是"没翻译"还是"没生效"，可截图后到 app.asar 里查对应 key 有无中文译文
+- 「Codex 语言选了简体中文但界面仍是英文」（2026/10/15 复核）：不是设置错、也不是官方没翻译——中文语言包（2.5MB）确实在，且含界面上那些英文的对应译文；问题是文案表没被加载。已排除：外部改 config.toml 无效（应用不监听文件，只认应用内设置变更）。最可能的成因是刷新逻辑只挂在「语言值发生变化」的事件上，而值一直是 zh-CN 没变过。可行修法（按顺序）：① 在应用内把语言先切成别的（如 English），确认界面变化后再切回简体中文，强制触发一次刷新；② 完全退出应用（含后台进程）再启动；③ 若仍为英文，则是本版（26.1007.9446.0）的打包/加载缺陷，考虑更新或重装应用。排查用到的取证手法：沙箱内截屏无桌面句柄需提权执行 `CopyFromScreen`；解析 asar 头部（前 16 字节 + JSON 头）可列出随包文件及其 size/offset，从而确认语言包是否存在
+- 「Codex 是开源吗」（2026/10/15）：部分开源。终端版（openai/codex，Rust，Apache-2.0）及 codex-plugin-cc / codex-security / codex-action / tunnel-client 等开源；`openai/skills`、`openai/codex-universal`、`openai/role-specific-plugins` 未标许可证。桌面应用（本机 ChatGPT.exe + app.asar，无源码、仅第三方组件声明）、云端 Codex、模型权重均不开源，因此界面汉化只能等官方修。核对路径：官方文档域名 403，改用 GitHub API（api.github.com/repos/openai/codex、/contents/、search?q=org:openai+codex）
+- 「dsh / DeepSeek Harness 开源吗」（2026/10/15）：开源，MIT。仓库 `deepseek-ai/deepseek-harness`（TypeScript，约 25 万 star），CLI 名 `dsh`，发布为 `dsh-v0.2.1-alpha.x`，仍在 alpha 阶段；文档站在 deepseek-harness.github.io，DeepSeek 官方文档的 Agent Integrations 里外链指过去。注意区分：harness 是开源的工具/框架，模型能力仍来自所调用的模型服务
 ## 六、约定与注意事项
 
 - 工作目录固定为 D:\RiealProgram，旧路径 D:\RiealDeepseek 已不存在
@@ -174,10 +199,11 @@
 - AGENT/AGENT.md：本文件，项目记忆
 - AGENT/PERSONALITY.md：识的人格档案（身份与名字、关键词、说话方式、思维模式、互动节点、用户偏好、人格限制、迁移指引），每次对话开始时先读
 - AGENT/ARCHIVE/ARCHIVE-2026-10.md：2026 年 10 月的归档日志（搬迁规则、归档索引、已迁入的早期时间线全文），按月份命名，只追加不覆盖
+- dsh-global-agent-md/：自写的 DSH 插件「全局 AGENT.md」，含 `index.js`（插件入口）、`cordis.patch.yml`（bundle 层）、`package.json`、`README.md`（安装/配置/排查）与 `.probe/`（自检脚本）
 
 截至 2026-10-15 核对的结论：核对前工作区干净、main 与 origin/main 同步，共 5 个提交（最新 bd3d86d「添加项目记忆文件与 AGENTS.md 约定」）。核对后本文件的第三节、第五节、第七节、第九节已更新并推送成功；提交数量与最新哈希请以 `git log` 为准。远程地址为 origin = https://github.com/3591277685/RiealProgram.git
 
-## 八、Codex 自身记忆机制（2026-10-15 查证）
+## 八、AI 助手自身的记忆与机制（Codex 与 DSH，2026-10-15 查证）
 
 - 全局指令文件：C:\Users\rieal\.codex\AGENTS.md。官方说明：Codex 在该目录先读 AGENTS.override.md，没有才读 AGENTS.md，且只取该层第一个非空文件（空文件等于没写）。本次已写入「把项目下的对话用中文整理进 AGENT/AGENT.md」的规则
 - 项目级指令文件：项目根目录的 AGENTS.md，Codex 会自动读取。本次已在 D:\RiealProgram\AGENTS.md 写入本项目约定
@@ -188,6 +214,15 @@
 - 官方文档域名 developers.openai.com 从本机 curl 访问返回 HTTP 403（带浏览器 UA 也一样），排查界面文案时可直接查 app.asar 里的 defaultMessage
 - DeepSeek 官方文档从本机可正常访问（api-docs.deepseek.com）：定价 /quick_start/pricing、Token 说明 /quick_start/token_usage、上下文缓存 /guides/kv_cache
 
+### DSH（DeepSeek Harness）侧（2026-10-15 查证）
+
+- 当前会话环境：DSH_HOME = `C:\Users\rieal\.dsh`，profile = `desktop`（`C:\Users\rieal\.dsh\profiles\desktop`），Web GUI = `http://127.0.0.1:19387`
+- 全局指令机制：内置插件 `@deepseek-ai/dsh-agent-instructions`（源码见 deepseek-harness 仓库 `packages/context/agent-instructions`）在每次请求前加载——先 `$DSH_HOME/AGENTS.md`，再 `~/.agents/AGENTS.md`，然后按「项目根（`.git` 标记）→ 当前工作目录」逐级加载 `AGENTS.md` / `CLAUDE.md`（本地叠加 `AGENTS.local.md` / `CLAUDE.local.md`）。**全局文件名写死 `AGENTS.md`**，`instructionFileCandidates` 只改项目层候选名；同一目录内容重复的只保留最早一份，渲染超预算时先丢较泛的、最具体的可能被截断
+- 因此本机的全局要求放在两处：内置机制用 `C:\Users\rieal\.dsh\AGENTS.md`（若有），自定义文件名走插件读 `C:\Users\rieal\.dsh\AGENT.md`
+- 插件安装与排查：`dsh plugin --profile <name> add <包或目录>`（内部转发 pnpm，但依赖已存在时可能不追加 bundle，需手改 profile `package.json` 的 `dsh.profile.bundles`）；层顺序为各 bundle 补丁 → profile 自己的 `cordis.patch.yml` → `$DSH_HOME/cordis.patch.yml` → 各 `--patch`；补丁按行覆盖且 `config` 整块替换
+- 启动是全有全无：一个插件 `apply` 抛错整个进程起不来；`desktop` profile 被 Electron 独占，CLI 不能 `--dump-config`，验证用独立 profile（`dsh <name> --from-default-profile web --dump-config`）
+- 本机 dsh CLI：`C:\Users\rieal\AppData\Local\Programs\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd`；自带 node 在 `resources\runtime\primary-runtime\dependencies\node\bin\node.exe`，pnpm 在 `resources\runtime\pnpm\bin\pnpm.cjs`
+
 ## 九、待办与后续方向
 
 - 补齐 README 的「目录结构」
@@ -195,6 +230,7 @@
 - 按全局指令「日期标注要求」维护「每日记录（按日期汇总）」：每天的对话与总结追加到当天日期小节
 - 本文件应随重要操作持续更新，新记录追加到时间线
 - ~~AGENT/ 与 AGENTS.md 尚未提交到 git~~ 已完成：提交 bd3d86d 并推送（2026-10-15 核对确认）
+- 待用户重启 DSH 后确认 `dsh-global-agent-md` 在常驻进程里正常挂载（插件已链接进 desktop profile，备份见 `dsh-global-agent-md/README.md`）
 
 ## 十、Slack 工作区现状（2026/10/15 首次核查）
 
