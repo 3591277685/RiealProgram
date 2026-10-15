@@ -1,7 +1,35 @@
 # AGENT — RiealProgram 项目记忆
 
 > 本文件记录本项目的背景、环境、已完成的操作、用户的要求与约定，供后续接手的 AI 助手（Agent）快速建立上下文。
-> 创建时间：2026-10-15　最后更新：2026-10-15（第五次更新：记录「背景信息窗口」提示的查证结论）
+> 创建时间：2026-10-15　最后更新：2026-10-15（第六次更新：按新全局指令改为按日期分节记录）
+
+## 每日记录（按日期汇总）
+
+> 依据全局指令「日期标注要求」：每天单独成节，同一天的内容追加到本日小节内。
+
+### 2026/10/15
+
+**完成的操作**
+
+1. 搭建并首次推送 RiealProgram 仓库：`git init -b main`、配置提交身份与 origin、写 README.md 与通用 .gitignore，首提交 6f53bef 推送成功。
+2. 目录搬迁：D:\RiealDeepseek → D:\RiealProgram（旧目录被工作区占用，改为搬内容后删除）。
+3. 处理一次推送被拒：远程有网页端提交 9bcf396「Update README.md」，本地 README 暂存改动冲突，备份后用 `git pull --ff-only` 快进解决。
+4. 用户自行完成两次提交并推送：3beaad0「补充git使用方法和常用命令」、37a9155「改变布局」。
+5. 建立项目记忆机制：AGENT/AGENT.md（先名为 AGENTmemory.md 后改名）、全局 C:\Users\rieal\.codex\AGENTS.md、项目 AGENTS.md，提交 bd3d86d 并推送。
+6. 核对仓库现状：修正第九节「AGENT/ 与 AGENTS.md 尚未提交」的过期待办与第一节过期的「当前最新提交」字段；工作区干净、main 与 origin/main 同步。
+7. 查证界面提示「背景信息窗口」：确认是上下文用量指示器（Context window 与 tokens 的误译），并记录应用文案位置 app.asar 的排查方法。
+8. 按要求修改全局指令：新增「日期标注要求」章节（本文件随即开始按日期分节）。
+
+**结论与教训**
+
+- 提交已经推送成功后不要再 `git commit --amend`（会与远程分叉导致 non-fast-forward）；需要改就再加一个提交，或用 `git fetch` + `git reset --soft origin/main` 把改动接到远程提交之上。
+- 推送失败多为网络瞬时问题（Connection was reset / Could not connect to server），隔一会儿重试即可。
+- developers.openai.com 从本机 curl 访问返回 403，查界面文案可直接读 app.asar 里的 defaultMessage。
+
+**当日待办**
+
+- README 的「目录结构」一节仍待补充
+- 可选：配置一键同步脚本 sync.ps1 或 post-commit 自动 push 钩子
 
 ## 一、项目基本信息
 
@@ -98,5 +126,6 @@
 
 - 补齐 README 的「目录结构」
 - 可选：配置一键同步脚本（sync.ps1）或 post-commit 自动 push 钩子
+- 按全局指令「日期标注要求」维护「每日记录（按日期汇总）」：每天的对话与总结追加到当天日期小节
 - 本文件应随重要操作持续更新，新记录追加到时间线
 - ~~AGENT/ 与 AGENTS.md 尚未提交到 git~~ 已完成：提交 bd3d86d 并推送（2026-10-15 核对确认）
