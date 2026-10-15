@@ -1,7 +1,7 @@
 # AGENT — RiealProgram 项目记忆
 
 > 本文件记录本项目的背景、环境、已完成的操作、用户的要求与约定，供后续接手的 AI 助手（Agent）快速建立上下文。
-> 创建时间：2026-10-15　最后更新：2026-10-15（第十五次更新：用户决定停用 Slack 插件）
+> 创建时间：2026-10-15　最后更新：2026-10-15（第十六次更新：查证记忆模块对新对话上下文的影响）
 
 ## 每日记录（按日期汇总）
 
@@ -31,6 +31,8 @@
 18. 接通 Slack 插件（2026/10/15）：用户启用 `slack@openai-api-curated` 插件并调用其默认提示（总结未读活动、起草回复），但会话内没有任何 Slack 工具。排查过程：`rg` 搜 `C:\Users\rieal\.codex\logs_2.sqlite`，命中 `MCP server startup failed server_name="slack" ... AuthRequired(...)`，即 MCP 服务 https://mcp.slack.com/mcp 要求 OAuth；`codex mcp list` 确认 slack 已注册（enabled，Auth: Unknown）；再执行 `codex mcp login slack`（需提权，会打开浏览器）完成授权，授权成功后 `mcp__slack` 工具集立即挂载到当前会话。
 19. 核查 Slack 工作区「识」的现状：成员只有 Rieal 一人（user_id U0C96HZU7R9，qq3591277685@gmail.com），共 6 个会话——公开频道 #所有-识（C0C8XDSMH47）、#新频道（C0C8XE11H7Z）、#社交（C0C9EMX1BJM），以及与 Rieal（D0C9GFPE344）、Slack（D0C9EN3U8C9）、Slackbot（D0C9ARXF0UW）的三个 DM。除「已加入此频道」的加入提示和 Slack 的免费试用提醒外没有任何消息，因此没有未读内容可总结，也没有待回复的消息。
 20. 用户决定停用 Slack 插件并取消使用（2026/10/15），原因是「要钱」，用户原话：「不用这个插件了，我取消使用，因为要钱」。此后不再调用 `mcp__slack` 工具、不再做 Slack 相关操作；由 `codex mcp login slack` 建立的本地 OAuth 凭证待用户确认后清理（`codex mcp logout slack`）。补充事实（据 Slack 自己发的 DM）：收费来自 Slack 工作区的免费试用到期（提醒里写的截至 11 月 12 日），不是 Codex 端 Slack 插件另收费用。
+
+21. 解答「记忆模块会不会对新创建的对话造成上下文影响」：核对 config.toml（[features] memories 与 [memories] 两个开关均为 true）、memories_1.sqlite（stage1_outputs 为 0 行，尚未生成记忆）、app.asar（`/memories` 斜杠命令可对当前对话单独开关「使用记忆/生成记忆」），并量出三处上下文占用。
 
 **结论与教训**
 
@@ -136,6 +138,7 @@
 - 「如何将 git 仓库隐藏为个人可见」：GitHub 仓库页 → Settings → General → 最下方 Danger Zone → Change repository visibility → Make private（需输入仓库名确认）。只能整仓转私有，不能只隐藏某个文件；已公开的内容收不回来（别人的 clone/fork、搜索引擎快照、此前抓取的副本）。转私有后推送拉取不受影响，但 GitHub Pages 从私有仓发布需付费计划，Actions 免费额度也变小。只想隐藏人格与记忆文件的话，可把 `AGENT/` 拆到单独的私有仓库（并在公开仓 `git rm --cached` 后写进 .gitignore，注意历史里仍留有旧副本）。本机未安装 gh CLI，命令行方式需另装或用 API。
 - 「单独拆到私有仓库会有什么影响」：能挡住以后的内容，但挡不住已公开的旧版本——公开仓历史里 13 个提交涉及 AGENT/（含人格档案全文），不重写历史就永久可查，这点上整仓私有反而更干净。另外本地会出现嵌 .git 被外层记成 gitlink（须在外层 .gitignore 加 AGENT/）、含嵌入仓库的检出无法被 Codex 归档 worktree、AGENT 移出项目目录会让 AGENTS.md 与全局指令里的路径约定失效；submodule 方案会在公开仓暴露私有仓地址。最省事的替代是「不进 git」：公开仓里 `git rm -r --cached AGENT` 并写入 .gitignore，本地文件照常保留，代价是没有云端备份
 - 「Slack 插件为什么不能用 / 怎么接上」：插件本身已启用，但 MCP 服务要求 OAuth，未授权时工具不会挂载。修复命令是 `codex mcp login slack`；授权后当前对话就能用，不用新开对话
+- 「记忆模块会不会对新创建的对话造成上下文影响」：会，但分三条路径。① 应用记忆模块（memories）开启时会把它生成的记忆注入新对话，当前记忆库 stage1_outputs 为 0 行，所以实际占用≈0；② 全局与项目 AGENTS.md 文档每次新对话都自动进上下文，粗估约 1.0k + 1.1k token；③ `AGENT/AGENT.md`（约 8.1k token）与 `AGENT/PERSONALITY.md`（约 3.6k token）**不会自动注入**，只有识按约定去读才占上下文。三者合计约 1.4%，但 AGENT.md 会随每日记录持续变大，建议做归档
 ## 六、约定与注意事项
 
 - 工作目录固定为 D:\RiealProgram，旧路径 D:\RiealDeepseek 已不存在
@@ -165,7 +168,7 @@
 
 - 全局指令文件：C:\Users\rieal\.codex\AGENTS.md。官方说明：Codex 在该目录先读 AGENTS.override.md，没有才读 AGENTS.md，且只取该层第一个非空文件（空文件等于没写）。本次已写入「把项目下的对话用中文整理进 AGENT/AGENT.md」的规则
 - 项目级指令文件：项目根目录的 AGENTS.md，Codex 会自动读取。本次已在 D:\RiealProgram\AGENTS.md 写入本项目约定
-- 应用自动积累的记忆：C:\Users\rieal\.codex\memories_1.sqlite（SQLite，含 stage1_outputs、jobs、consolidation_progress 等表）。config.toml 中 [features] memories = true，[memories] generate_memories / use_memories = true，由程序自动管理，不要手改
+- 应用自动积累的记忆：C:\Users\rieal\.codex\memories_1.sqlite（SQLite，含 stage1_outputs、jobs、consolidation_progress 等表）。config.toml 中 [features] memories = true，[memories] generate_memories / use_memories = true，由程序自动管理，不要手改。2026/10/15 核对：stage1_outputs 为 0 行（尚未生成任何记忆），jobs 与 consolidation_progress 各 1 行；应用内有 `/memories` 斜杠命令，可对当前对话单独开关「使用记忆」「生成记忆」，还支持从 ChatGPT 导入记忆（`composer.memoriesSlashCommand.*`）
 - 对话原始记录：C:\Users\rieal\.codex\sessions\2026\10\15\rollout-*.jsonl，索引为 session_index.jsonl
 - 官方文档：https://developers.openai.com/codex/guides/agents-md（AGENTS.md 自定义指令）、https://developers.openai.com/codex/memories（Memories）
 - 应用界面文案的位置：C:\Program Files\WindowsApps\OpenAI.Codex_<版本>\app\resources\app.asar。本次装的是 26.1007.9446.0，可用 `rg -a -b -o -F "关键字" app.asar` 快速定位字符串与字节偏移，再用 PowerShell 的 FileStream 定点读取上下文，即可看到某个界面元素的英文原文（defaultMessage）与说明（description）
