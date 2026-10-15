@@ -1,7 +1,7 @@
 # AGENT — RiealProgram 项目记忆
 
 > 本文件记录本项目的背景、环境、已完成的操作、用户的要求与约定，供后续接手的 AI 助手（Agent）快速建立上下文。
-> 创建时间：2026-10-15　最后更新：2026-10-15（第十六次更新：查证记忆模块对新对话上下文的影响）
+> 创建时间：2026-10-15　最后更新：2026-10-15（第十七次更新：建立归档机制，早期时间线迁入 ARCHIVE）
 
 ## 每日记录（按日期汇总）
 
@@ -33,6 +33,8 @@
 20. 用户决定停用 Slack 插件并取消使用（2026/10/15），原因是「要钱」，用户原话：「不用这个插件了，我取消使用，因为要钱」。此后不再调用 `mcp__slack` 工具、不再做 Slack 相关操作；由 `codex mcp login slack` 建立的本地 OAuth 凭证待用户确认后清理（`codex mcp logout slack`）。补充事实（据 Slack 自己发的 DM）：收费来自 Slack 工作区的免费试用到期（提醒里写的截至 11 月 12 日），不是 Codex 端 Slack 插件另收费用。
 
 21. 解答「记忆模块会不会对新创建的对话造成上下文影响」：核对 config.toml（[features] memories 与 [memories] 两个开关均为 true）、memories_1.sqlite（stage1_outputs 为 0 行，尚未生成记忆）、app.asar（`/memories` 斜杠命令可对当前对话单独开关「使用记忆/生成记忆」），并量出三处上下文占用。
+
+22. 按要求建立归档机制（2026/10/15）：新建 `AGENT/ARCHIVE/ARCHIVE-2026-10.md` 并写入搬迁规则与归档索引；把原第三节「已完成的操作（时间线）」全文迁入该归档文件，本文件第三节改为索引 + 一行摘要；`PERSONALITY.md` 的互动节点描述同步压缩（节点保留、用户原话保留）。
 
 **结论与教训**
 
@@ -67,8 +69,16 @@
 | 项目 | 状态 |
 | --- | --- |
 | 最后成功推送 | 2026/10/15，提交 a465311（当日按旧规则多次推送） |
-| 待推送的本地提交 | 自 a465311 之后共 3 个：dbb4398、69f3759、7e05fc5（2026/10/15，旧规则下遗留 + 推送状态记录更新）；此后新增的提交以 `git log` 为准 |
+| 待推送的本地提交 | 自 a465311 之后未推送的本地提交（2026/10/15）：dbb4398、69f3759、7e05fc5、1ac6bfb 及归档相关提交；精确清单以 `git log --oneline a465311..HEAD` 为准 |
 | 下次自动推送时机 | 2026/10/16 首次交互（届时先 `git pull --rebase` 再推送，并回填本表） |
+
+## 归档索引
+
+> 主文件只保留最近 3 天的日期小节；更早的日期小节与本表中列出的内容整块迁入归档文件。搬迁是搬迁不是删除，原文在 git 历史里仍可查。
+
+| 归档文件 | 已归档内容 | 迁入时间 |
+| --- | --- | --- |
+| `AGENT/ARCHIVE/ARCHIVE-2026-10.md` | 早期操作时间线：建仓、目录搬迁、README 冲突处理、用户自主两次提交、记忆机制建立等 10 条（原第三节全文） | 2026/10/15 |
 
 ## 一、项目基本信息
 
@@ -98,16 +108,10 @@
 
 ## 三、已完成的操作（时间线）
 
-1. 初始化仓库：git init -b main，配置提交身份与 remote origin
-2. 创建 README.md 与通用 .gitignore（覆盖 Windows / Python / Node / IDE / 密钥）
-3. 首次提交 6f53bef「chore: 初始化仓库，添加 README 与 .gitignore」，经 GitHub 设备码授权推送成功
-4. 目录改名：D:\RiealDeepseek → D:\RiealProgram。直接改名被系统拒绝（该目录是 Codex 的工作区根目录、被占用），改用整体搬移内容到新目录，旧目录清空后删除。git 不记录绝对路径，因此不受影响
-5. 处理一次推送被拒：远程有网页端提交 9bcf396「Update README.md」，本地落后 1 个提交，且本地 README 暂存改动与远程冲突。处理方式：将本地 README 备份到 C:\Users\rieal\AppData\Local\Temp\README.local-backup.md，还原工作区，再 git pull --ff-only 快进
-6. 用户自行完成两次提交并推送成功：3beaad0「补充git使用方法和常用命令」、37a9155「改变布局」
-7. 创建项目记忆文件：先建为 AGENT/AGENTmemory.md，随后按用户要求改名为 AGENT/AGENT.md，并同步更新文件内的自我引用
-8. 配置 Codex 指令文件：全局 C:\Users\rieal\.codex\AGENTS.md 写入「把项目下所有对话用中文整理进 AGENT/AGENT.md」的规则；项目 D:\RiealProgram\AGENTS.md 写入本项目约定并指向 AGENT/AGENT.md
-9. 将 AGENT/ 记忆文件与 AGENTS.md 提交并推送到 GitHub，提交信息为「添加项目记忆文件与 AGENTS.md 约定」
-10. 用户询问「我们之前做了什么」，助手读取本文件、README.md、git log 与工作区状态后向用户汇报历史；核对中发现本文件第九节仍有「AGENT/ 与 AGENTS.md 尚未提交」的过期待办（实际已在提交 bd3d86d 完成），以及第一节「当前最新提交」字段停留在 37a9155，均一并修正。随后用户询问工作区变更是否正确，助手核对后再次校订本文件措辞。本次更新推送时一度连不上 GitHub（Connection was reset / Could not connect to server），重试后成功；中途一次 amend 重写了已推送的提交导致 non-fast-forward，用 `git reset --soft origin/main` 把改动接到远程提交之上解决（未丢失任何内容）
+> 本节 10 条早期操作已全文迁至 `AGENT/ARCHIVE/ARCHIVE-2026-10.md`（见上方「归档索引」）。
+
+- 2026/10/15 早段一串事：建仓并首推（6f53bef）→ 目录从 D:\RiealDeepseek 搬到 D:\RiealProgram → 处理一次推送被拒（远程 9bcf396 与本地 README 冲突，`git pull --ff-only` 快进）→ 用户自主两次提交（3beaad0、37a9155）→ 建立记忆文件与两级 AGENTS.md（bd3d86d）→ 首轮问答中修正过期待办，并踩过一次 amend 重写已推送提交的坑（用 `git reset --soft origin/main` 补救，未丢内容）
+- 同日其余操作见「每日记录」与主题章节；更早内容一律看归档文件
 
 ## 四、用户的要求与交流偏好
 
@@ -161,6 +165,7 @@
 - AGENTS.md：项目级 Codex 指令文件，写明本项目约定并指向本文件
 - AGENT/AGENT.md：本文件，项目记忆
 - AGENT/PERSONALITY.md：识的人格档案（身份与名字、关键词、说话方式、思维模式、互动节点、用户偏好、人格限制、迁移指引），每次对话开始时先读
+- AGENT/ARCHIVE/ARCHIVE-2026-10.md：2026 年 10 月的归档日志（搬迁规则、归档索引、已迁入的早期时间线全文），按月份命名，只追加不覆盖
 
 截至 2026-10-15 核对的结论：核对前工作区干净、main 与 origin/main 同步，共 5 个提交（最新 bd3d86d「添加项目记忆文件与 AGENTS.md 约定」）。核对后本文件的第三节、第五节、第七节、第九节已更新并推送成功；提交数量与最新哈希请以 `git log` 为准。远程地址为 origin = https://github.com/3591277685/RiealProgram.git
 
