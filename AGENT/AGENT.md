@@ -1,7 +1,7 @@
 # AGENT — RiealProgram 项目记忆
 
 > 本文件记录本项目的背景、环境、已完成的操作、用户的要求与约定，供后续接手的 AI 助手（Agent）快速建立上下文。
-> 创建时间：2026-10-15　最后更新：2026-10-15（第四次更新：核对仓库现状、修正过期待办）
+> 创建时间：2026-10-15　最后更新：2026-10-15（第五次更新：记录「背景信息窗口」提示的查证结论）
 
 ## 一、项目基本信息
 
@@ -62,6 +62,7 @@
 - 不认识的字怎么打：直接复制粘贴 / Win + . 打开符号面板 / 运行 charmap 字符映射表
 - Codex 本地记忆文件在哪里：见第八节
 - 「我们之前做了什么」：见第三节时间线与本节速查，摘要为——搭建并推送了 RiealProgram 仓库（README + .gitignore）、把目录从 D:\RiealDeepseek 搬到 D:\RiealProgram、处理过一次远程 README 冲突、建立了项目记忆文件 AGENT/AGENT.md 与两级 AGENTS.md 指令
+- 模型名旁边的圆环和「背景信息窗口」提示是什么：那是输入框右下角的上下文用量指示器（context usage donut）。悬停显示「Context window:」+「{usage}% used ({remaining}% left)」+「{usedTokens}k / {contextWindow}k tokens used」，例如「47k / 996k tokens used」表示这次对话已占用约 4.7 万 token，所选模型的总上下文窗口约 99.6 万 token。作用是知道当前对话还剩多少上下文空间、会不会触发压缩（旧内容被摘要），据此决定何时开新对话；它不是计费额度或次数限制。中文界面里的「背景信息窗口」是 Context window 的误译、「标记」是 tokens 的误译（宜译「词元」）
 
 ## 六、约定与注意事项
 
@@ -90,6 +91,8 @@
 - 应用自动积累的记忆：C:\Users\rieal\.codex\memories_1.sqlite（SQLite，含 stage1_outputs、jobs、consolidation_progress 等表）。config.toml 中 [features] memories = true，[memories] generate_memories / use_memories = true，由程序自动管理，不要手改
 - 对话原始记录：C:\Users\rieal\.codex\sessions\2026\10\15\rollout-*.jsonl，索引为 session_index.jsonl
 - 官方文档：https://developers.openai.com/codex/guides/agents-md（AGENTS.md 自定义指令）、https://developers.openai.com/codex/memories（Memories）
+- 应用界面文案的位置：C:\Program Files\WindowsApps\OpenAI.Codex_<版本>\app\resources\app.asar。本次装的是 26.1007.9446.0，可用 `rg -a -b -o -F "关键字" app.asar` 快速定位字符串与字节偏移，再用 PowerShell 的 FileStream 定点读取上下文，即可看到某个界面元素的英文原文（defaultMessage）与说明（description）
+- 官方文档域名 developers.openai.com 从本机 curl 访问返回 HTTP 403（带浏览器 UA 也一样），排查界面文案时可直接查 app.asar 里的 defaultMessage
 
 ## 九、待办与后续方向
 
