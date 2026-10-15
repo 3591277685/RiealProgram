@@ -38,4 +38,33 @@ git push               # 6. 上传到 GitHub
 ```
 ## 目录结构
 
-> 待补充。
+```
+RiealProgram/
+├── README.md                  项目说明（本文件）
+├── AGENTS.md                  项目级 AI 指令：本项目的工作约定
+├── .gitignore                 通用忽略规则（.env、node_modules/、dist/ 等）
+├── AGENT/                     记忆与人格数据
+│   ├── AGENT.md               项目记忆：背景、时间线、约定、待办
+│   ├── PERSONALITY.md         「识」的人格档案，每次对话开始时先读
+│   └── ARCHIVE/               按月份归档的历史记录（只追加，不覆盖）
+│       └── ARCHIVE-2026-10.md
+└── dsh-global-agent-md/       自写 DSH 插件：把程序目录下的全局 AGENT.md 注入每次请求
+    ├── index.js               宿主半边：上下文注入 + 三条 HTTP 路由
+    ├── client/client.js       浏览器半边：设置 → 插件 →「全局要求」页面
+    ├── cordis.patch.yml       bundle 层声明
+    ├── package.json           包信息与依赖
+    ├── pnpm-lock.yaml
+    ├── pnpm-workspace.yaml
+    ├── README.md              安装、配置与排查说明
+    └── .probe/                自检脚本（不被运行时加载）
+```
+
+## 文件说明
+
+| 路径 | 作用 |
+| --- | --- |
+| `AGENT/AGENT.md` | 项目记忆：基本信息、按日期汇总的每日记录、用户偏好、约定与待办、推送状态 |
+| `AGENT/PERSONALITY.md` | 助手「识」的人格档案：身份、关键词、说话方式、互动节点与迁移指引 |
+| `AGENT/ARCHIVE/` | 归档文件，按 `ARCHIVE-YYYY-MM.md` 命名；主文件只留最近 3 天 |
+| `AGENTS.md` | 项目级约定（提交与推送节奏、交流方式、记忆文件维护规则） |
+| `dsh-global-agent-md/` | DeepSeek Harness 插件，读取 `C:\Users\rieal\.dsh\AGENT.md` 并注入每次请求；详见其自带 README |
