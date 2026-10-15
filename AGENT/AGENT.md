@@ -1,7 +1,7 @@
 # AGENT — RiealProgram 项目记忆
 
 > 本文件记录本项目的背景、环境、已完成的操作、用户的要求与约定，供后续接手的 AI 助手（Agent）快速建立上下文。
-> 创建时间：2026-10-15　最后更新：2026-10-15（第六次更新：按新全局指令改为按日期分节记录）
+> 创建时间：2026-10-15　最后更新：2026-10-15（第七次更新：记录 DeepSeek 缓存计费口径的查证结果）
 
 ## 每日记录（按日期汇总）
 
@@ -20,6 +20,7 @@
 7. 查证界面提示「背景信息窗口」：确认是上下文用量指示器（Context window 与 tokens 的误译），并记录应用文案位置 app.asar 的排查方法。
 8. 按要求修改全局指令：新增「日期标注要求」章节（本文件随即开始按日期分节）。
 9. 解答「上下文满了之后只要新开一个项目就可以了吗」，核对应用内文案确认压缩（compaction）的界面提示。
+10. 解答「缓存、命中缓存、未命中缓存、输出是什么意思」，并抓取 DeepSeek 官方定价页（api-docs.deepseek.com/quick_start/pricing）与上下文缓存说明页（/guides/kv_cache）核对计费口径与价格。
 
 **结论与教训**
 
@@ -92,6 +93,7 @@
 - 特殊字符输入：反引号（grave accent，U+0060）在键盘左上角、Esc 下方、数字 1 左侧；Shift 加同一键是波浪号 ~；中文标点状态下可能打出全角 ｀，需先切到英文状态。Markdown 中三个反引号表示代码块
 - 不认识的字怎么打：直接复制粘贴 / Win + . 打开符号面板 / 运行 charmap 字符映射表
 - Codex 本地记忆文件在哪里：见第八节
+- 「缓存、命中缓存、未命中缓存、输出」是什么意思：这是 DeepSeek 的计费口径，把输入拆成「命中缓存」与「未命中缓存」两类，再加「输出」一类。缓存指 Context Caching on Disk（默认开启、无需改代码）：本次请求的前缀与之前已持久化的缓存单元完全一致时，这部分输入按「缓存命中」的低价计费，否则按「未命中」的正常输入价。官方价格（每 100 万 token，闲时价）deepseek-flash：命中 $0.003、未命中 $0.15、输出 $0.6；deepseek-v4-pro：命中 $0.022、未命中 $0.66、输出 $1.98；高峰段为闲时价的 2 倍。API 响应的 usage 里 prompt_cache_hit_tokens 与 prompt_cache_miss_tokens 可查命中情况
 - 「我们之前做了什么」：见第三节时间线与本节速查，摘要为——搭建并推送了 RiealProgram 仓库（README + .gitignore）、把目录从 D:\RiealDeepseek 搬到 D:\RiealProgram、处理过一次远程 README 冲突、建立了项目记忆文件 AGENT/AGENT.md 与两级 AGENTS.md 指令
 - 「上下文满了之后只要新开一个项目就可以了吗」：不必新开项目，在同一个项目里新开一个对话就够了（上下文按对话计数）。同项目新对话保留工作目录、仓库与 AGENTS.md，也会按约定读本文件，所以项目背景能找回来；但旧对话的内容不会自动带过去，只有写进文件的部分才留得下。另外上下文满并不强制新开对话——应用会自动压缩（界面提示「上下文已自动压缩」），旧内容变摘要后可以继续用
 - 模型名旁边的圆环和「背景信息窗口」提示是什么：那是输入框右下角的上下文用量指示器（context usage donut）。悬停显示「Context window:」+「{usage}% used ({remaining}% left)」+「{usedTokens}k / {contextWindow}k tokens used」，例如「47k / 996k tokens used」表示这次对话已占用约 4.7 万 token，所选模型的总上下文窗口约 99.6 万 token。作用是知道当前对话还剩多少上下文空间、会不会触发压缩（旧内容被摘要），据此决定何时开新对话；它不是计费额度或次数限制。中文界面里的「背景信息窗口」是 Context window 的误译、「标记」是 tokens 的误译（宜译「词元」）
@@ -125,6 +127,7 @@
 - 官方文档：https://developers.openai.com/codex/guides/agents-md（AGENTS.md 自定义指令）、https://developers.openai.com/codex/memories（Memories）
 - 应用界面文案的位置：C:\Program Files\WindowsApps\OpenAI.Codex_<版本>\app\resources\app.asar。本次装的是 26.1007.9446.0，可用 `rg -a -b -o -F "关键字" app.asar` 快速定位字符串与字节偏移，再用 PowerShell 的 FileStream 定点读取上下文，即可看到某个界面元素的英文原文（defaultMessage）与说明（description）
 - 官方文档域名 developers.openai.com 从本机 curl 访问返回 HTTP 403（带浏览器 UA 也一样），排查界面文案时可直接查 app.asar 里的 defaultMessage
+- DeepSeek 官方文档从本机可正常访问（api-docs.deepseek.com）：定价 /quick_start/pricing、Token 说明 /quick_start/token_usage、上下文缓存 /guides/kv_cache
 
 ## 九、待办与后续方向
 
