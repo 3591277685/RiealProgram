@@ -1,7 +1,7 @@
 # AGENT — RiealProgram 项目记忆
 
 > 本文件记录本项目的背景、环境、已完成的操作、用户的要求与约定，供后续接手的 AI 助手（Agent）快速建立上下文。
-> 创建时间：2026-10-15　最后更新：2026-10-15（第十三次更新：推送改为每天一次 + 用户明确要求）
+> 创建时间：2026-10-15　最后更新：2026-10-15（第十四次更新：接通 Slack 插件并核查工作区现状）
 
 ## 每日记录（按日期汇总）
 
@@ -28,6 +28,8 @@
 15. 解答「如何将 git 仓库隐藏为个人可见」：给出 GitHub 整仓转 Private 的操作路径、后果清单（历史不可撤回、Pages 需付费、Actions 额度）与「只隐藏 AGENT/ 目录」的分仓方案；确认本机未安装 gh CLI。截至本日仓库仍为公开，若日后真的转私有需同步更新第一节「可见性」字段。
 16. 评估「单独拆到私有仓库会有什么影响」：核对公开仓历史，涉及 AGENT/ 的提交共 13 个（其中 085feb2、02e4380、a465311 含人格档案全文），说明拆仓后旧版本仍公开、需重写历史才能清除，并列出嵌 .git 被记成 gitlink、Codex 无法归档含嵌入仓库的 worktree、路径约定失效、submodule 会暴露私有仓地址等具体影响。
 17. 用户改变推送节奏：不再每次改动都推送，只有「新的一天首次交互」或「用户明确要求」时才推送；本地提交照常。已写入全局指令与项目 AGENTS.md，并新增本节「推送状态」小节用于接力。
+18. 接通 Slack 插件（2026/10/15）：用户启用 `slack@openai-api-curated` 插件并调用其默认提示（总结未读活动、起草回复），但会话内没有任何 Slack 工具。排查过程：`rg` 搜 `C:\Users\rieal\.codex\logs_2.sqlite`，命中 `MCP server startup failed server_name="slack" ... AuthRequired(...)`，即 MCP 服务 https://mcp.slack.com/mcp 要求 OAuth；`codex mcp list` 确认 slack 已注册（enabled，Auth: Unknown）；再执行 `codex mcp login slack`（需提权，会打开浏览器）完成授权，授权成功后 `mcp__slack` 工具集立即挂载到当前会话。
+19. 核查 Slack 工作区「识」的现状：成员只有 Rieal 一人（user_id U0C96HZU7R9，qq3591277685@gmail.com），共 6 个会话——公开频道 #所有-识（C0C8XDSMH47）、#新频道（C0C8XE11H7Z）、#社交（C0C9EMX1BJM），以及与 Rieal（D0C9GFPE344）、Slack（D0C9EN3U8C9）、Slackbot（D0C9ARXF0UW）的三个 DM。除「已加入此频道」的加入提示和 Slack 的免费试用提醒外没有任何消息，因此没有未读内容可总结，也没有待回复的消息。
 
 **结论与教训**
 
@@ -36,6 +38,8 @@
 - developers.openai.com 从本机 curl 访问返回 403，查界面文案可直接读 app.asar 里的 defaultMessage。
 - 上下文按「每次对话（任务）」计数，不是按项目：满了只需在同一项目里新开对话，不必新开项目。同项目新开对话仍保留工作目录、git 仓库与 AGENTS.md，且按项目约定会先读本文件，项目背景能找回来；但新对话不记得旧对话内容，只有写进文件的东西才会被带过去。
 - 上下文将满时应用会自动压缩：界面出现分隔线「上下文已自动压缩」（英文 Context automatically compacted），也可手动触发（「上下文已压缩」）；压缩期间显示「正在压缩上下文（可能需要几分钟）」，中断则显示「压缩已中断」。压缩后旧内容被摘要替代，细节可能丢失。
+- Slack 插件（slack@openai-api-curated）是 HTTP MCP 服务 https://mcp.slack.com/mcp，必须完成 OAuth 授权后会话里才会有工具。判定与修复路径：`codex mcp list` 看注册情况与 Auth 状态（注册了但未授权时显示 Auth: Unknown）→ `codex mcp login slack` 走授权流程 → 授权成功后工具集即时挂载，不必重开对话。注意 `codex mcp list` 需要 CODEX_HOME 能解析（沙箱里先设好环境变量），否则报「Could not find home directory」。
+- 插件「已启用」或 MCP server「已配置」≠ 当前会话有工具：连接失败时工具根本不会出现在工具清单里，应先查证据（应用日志库 `C:\Users\rieal\.codex\logs_2.sqlite` 可直接 rg 文本，含 MCP 启动错误）再动手。
 
 **助手人格与说话方式（2026/10/15）**
 
@@ -60,7 +64,7 @@
 | 项目 | 状态 |
 | --- | --- |
 | 最后成功推送 | 2026/10/15，提交 a465311（当日按旧规则多次推送） |
-| 待推送的本地提交 | 自 a465311 之后的本地提交：dbb4398、69f3759（2026/10/15，旧规则下遗留的未推送内容）；此后新增的提交以 `git log` 为准 |
+| 待推送的本地提交 | 自 a465311 之后共 3 个：dbb4398、69f3759、7e05fc5（2026/10/15，旧规则下遗留 + 推送状态记录更新）；此后新增的提交以 `git log` 为准 |
 | 下次自动推送时机 | 2026/10/16 首次交互（届时先 `git pull --rebase` 再推送，并回填本表） |
 
 ## 一、项目基本信息
@@ -130,6 +134,7 @@
 
 - 「如何将 git 仓库隐藏为个人可见」：GitHub 仓库页 → Settings → General → 最下方 Danger Zone → Change repository visibility → Make private（需输入仓库名确认）。只能整仓转私有，不能只隐藏某个文件；已公开的内容收不回来（别人的 clone/fork、搜索引擎快照、此前抓取的副本）。转私有后推送拉取不受影响，但 GitHub Pages 从私有仓发布需付费计划，Actions 免费额度也变小。只想隐藏人格与记忆文件的话，可把 `AGENT/` 拆到单独的私有仓库（并在公开仓 `git rm --cached` 后写进 .gitignore，注意历史里仍留有旧副本）。本机未安装 gh CLI，命令行方式需另装或用 API。
 - 「单独拆到私有仓库会有什么影响」：能挡住以后的内容，但挡不住已公开的旧版本——公开仓历史里 13 个提交涉及 AGENT/（含人格档案全文），不重写历史就永久可查，这点上整仓私有反而更干净。另外本地会出现嵌 .git 被外层记成 gitlink（须在外层 .gitignore 加 AGENT/）、含嵌入仓库的检出无法被 Codex 归档 worktree、AGENT 移出项目目录会让 AGENTS.md 与全局指令里的路径约定失效；submodule 方案会在公开仓暴露私有仓地址。最省事的替代是「不进 git」：公开仓里 `git rm -r --cached AGENT` 并写入 .gitignore，本地文件照常保留，代价是没有云端备份
+- 「Slack 插件为什么不能用 / 怎么接上」：插件本身已启用，但 MCP 服务要求 OAuth，未授权时工具不会挂载。修复命令是 `codex mcp login slack`；授权后当前对话就能用，不用新开对话
 ## 六、约定与注意事项
 
 - 工作目录固定为 D:\RiealProgram，旧路径 D:\RiealDeepseek 已不存在
@@ -143,6 +148,7 @@
 - 项目指令文件 D:\RiealProgram\AGENTS.md 会被 Codex 自动读取，修改它即改变本项目的工作约定
 - 推送节奏（2026/10/15 起）：默认不推送，仅①新的一天首次交互、②用户明确要求；本地提交照常，未推送的提交必须标在「推送状态」小节里
 - 助手人格关键词（2026/10/15 首次归纳，明细与表格见 AGENTS.md 的「AI 人格设定与约定」）：结论先行、证据溯源、受阻即换路、主动认错并给教训、表格化对比、类比解释、事实与推断分离、直接动手、风险前置；待收敛项为回复偏长与工具使用的重复性错误
+- Slack 集成（2026/10/15 接通）：工具在 `mcp__slack` 命名空间，读操作有 slack_read_channel / slack_read_thread / slack_search_public / slack_list_user_channels / slack_read_canvas / slack_read_list 等，写操作有 slack_send_message / slack_send_message_draft / slack_schedule_message / slack_add_reaction / slack_add_list_record 等。`slack_search_public_and_private`（含 DM、私聊）按插件说明需先取得用户同意再调用；`slack_search_public` 一般无需额外同意。授权凭证不要写进仓库或记忆文件
 
 ## 七、仓库当前文件
 
@@ -172,3 +178,17 @@
 - 按全局指令「日期标注要求」维护「每日记录（按日期汇总）」：每天的对话与总结追加到当天日期小节
 - 本文件应随重要操作持续更新，新记录追加到时间线
 - ~~AGENT/ 与 AGENTS.md 尚未提交到 git~~ 已完成：提交 bd3d86d 并推送（2026-10-15 核对确认）
+
+## 十、Slack 工作区现状（2026/10/15 首次核查）
+
+| 项目 | 内容 |
+| --- | --- |
+| 工作区名 | 识 |
+| 当前用户 | Rieal，user_id U0C96HZU7R9，邮箱 qq3591277685@gmail.com |
+| 成员数 | 1 人（工作区刚建，只有用户自己） |
+| 会话数 | 6 个：3 个公开频道 + 3 个 DM |
+| 消息情况 | 只有「已加入此频道」提示（2026-10-15 09:51–09:53）与 Slack 的试用提醒，无实际对话内容 |
+| 待回复 | 无 |
+| 试用期 | Slack 免费试用截至 11 月 12 日（来自 Slack DM 提醒） |
+
+频道与 DM 的 ID 记录在上方「完成的操作」第 19 条，后续要发消息或起草草稿时可直接引用这些 channel_id。
