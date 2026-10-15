@@ -1,7 +1,7 @@
 # AGENT — RiealProgram 项目记忆
 
 > 本文件记录本项目的背景、环境、已完成的操作、用户的要求与约定，供后续接手的 AI 助手（Agent）快速建立上下文。
-> 创建时间：2026-10-15　最后更新：2026-10-15（第十四次更新：接通 Slack 插件并核查工作区现状）
+> 创建时间：2026-10-15　最后更新：2026-10-15（第十五次更新：用户决定停用 Slack 插件）
 
 ## 每日记录（按日期汇总）
 
@@ -30,6 +30,7 @@
 17. 用户改变推送节奏：不再每次改动都推送，只有「新的一天首次交互」或「用户明确要求」时才推送；本地提交照常。已写入全局指令与项目 AGENTS.md，并新增本节「推送状态」小节用于接力。
 18. 接通 Slack 插件（2026/10/15）：用户启用 `slack@openai-api-curated` 插件并调用其默认提示（总结未读活动、起草回复），但会话内没有任何 Slack 工具。排查过程：`rg` 搜 `C:\Users\rieal\.codex\logs_2.sqlite`，命中 `MCP server startup failed server_name="slack" ... AuthRequired(...)`，即 MCP 服务 https://mcp.slack.com/mcp 要求 OAuth；`codex mcp list` 确认 slack 已注册（enabled，Auth: Unknown）；再执行 `codex mcp login slack`（需提权，会打开浏览器）完成授权，授权成功后 `mcp__slack` 工具集立即挂载到当前会话。
 19. 核查 Slack 工作区「识」的现状：成员只有 Rieal 一人（user_id U0C96HZU7R9，qq3591277685@gmail.com），共 6 个会话——公开频道 #所有-识（C0C8XDSMH47）、#新频道（C0C8XE11H7Z）、#社交（C0C9EMX1BJM），以及与 Rieal（D0C9GFPE344）、Slack（D0C9EN3U8C9）、Slackbot（D0C9ARXF0UW）的三个 DM。除「已加入此频道」的加入提示和 Slack 的免费试用提醒外没有任何消息，因此没有未读内容可总结，也没有待回复的消息。
+20. 用户决定停用 Slack 插件并取消使用（2026/10/15），原因是「要钱」，用户原话：「不用这个插件了，我取消使用，因为要钱」。此后不再调用 `mcp__slack` 工具、不再做 Slack 相关操作；由 `codex mcp login slack` 建立的本地 OAuth 凭证待用户确认后清理（`codex mcp logout slack`）。补充事实（据 Slack 自己发的 DM）：收费来自 Slack 工作区的免费试用到期（提醒里写的截至 11 月 12 日），不是 Codex 端 Slack 插件另收费用。
 
 **结论与教训**
 
@@ -148,7 +149,7 @@
 - 项目指令文件 D:\RiealProgram\AGENTS.md 会被 Codex 自动读取，修改它即改变本项目的工作约定
 - 推送节奏（2026/10/15 起）：默认不推送，仅①新的一天首次交互、②用户明确要求；本地提交照常，未推送的提交必须标在「推送状态」小节里
 - 助手人格关键词（2026/10/15 首次归纳，明细与表格见 AGENTS.md 的「AI 人格设定与约定」）：结论先行、证据溯源、受阻即换路、主动认错并给教训、表格化对比、类比解释、事实与推断分离、直接动手、风险前置；待收敛项为回复偏长与工具使用的重复性错误
-- Slack 集成（2026/10/15 接通）：工具在 `mcp__slack` 命名空间，读操作有 slack_read_channel / slack_read_thread / slack_search_public / slack_list_user_channels / slack_read_canvas / slack_read_list 等，写操作有 slack_send_message / slack_send_message_draft / slack_schedule_message / slack_add_reaction / slack_add_list_record 等。`slack_search_public_and_private`（含 DM、私聊）按插件说明需先取得用户同意再调用；`slack_search_public` 一般无需额外同意。授权凭证不要写进仓库或记忆文件
+- ~~Slack 集成（2026/10/15 接通）~~ 已于同日停用：用户决定不再使用该插件（原因是要收费），此后不再调用 Slack 相关工具。曾用到的工具在 `mcp__slack` 命名空间（读：slack_read_channel / slack_read_thread / slack_search_public / slack_list_user_channels 等；写：slack_send_message / slack_send_message_draft / slack_schedule_message 等）。`slack_search_public_and_private`（含 DM、私聊）按插件说明需先取得用户同意再调用。若日后重新启用，授权凭证不要写进仓库或记忆文件
 
 ## 七、仓库当前文件
 
@@ -190,5 +191,6 @@
 | 消息情况 | 只有「已加入此频道」提示（2026-10-15 09:51–09:53）与 Slack 的试用提醒，无实际对话内容 |
 | 待回复 | 无 |
 | 试用期 | Slack 免费试用截至 11 月 12 日（来自 Slack DM 提醒） |
+| 当前状态 | 2026/10/15 用户决定停用（原因：要收费），此后识不再调用 Slack 工具；本条仅作事实留存 |
 
 频道与 DM 的 ID 记录在上方「完成的操作」第 19 条，后续要发消息或起草草稿时可直接引用这些 channel_id。
