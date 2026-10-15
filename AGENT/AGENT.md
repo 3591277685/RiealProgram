@@ -40,7 +40,7 @@
 7. 创建项目记忆文件：先建为 AGENT/AGENTmemory.md，随后按用户要求改名为 AGENT/AGENT.md，并同步更新文件内的自我引用
 8. 配置 Codex 指令文件：全局 C:\Users\rieal\.codex\AGENTS.md 写入「把项目下所有对话用中文整理进 AGENT/AGENT.md」的规则；项目 D:\RiealProgram\AGENTS.md 写入本项目约定并指向 AGENT/AGENT.md
 9. 将 AGENT/ 记忆文件与 AGENTS.md 提交并推送到 GitHub，提交信息为「添加项目记忆文件与 AGENTS.md 约定」
-10. 用户询问「我们之前做了什么」，助手读取本文件、README.md、git log 与工作区状态后向用户汇报历史；核对中发现本文件第九节仍有「AGENT/ 与 AGENTS.md 尚未提交」的过期待办，实际已在提交 bd3d86d 完成，故一并修正
+10. 用户询问「我们之前做了什么」，助手读取本文件、README.md、git log 与工作区状态后向用户汇报历史；核对中发现本文件第九节仍有「AGENT/ 与 AGENTS.md 尚未提交」的过期待办，实际已在提交 bd3d86d 完成，故一并修正。随后用户询问工作区变更是否正确，助手核对后再次校订本文件措辞。本次更新推送时一度连不上 GitHub（Connection was reset / Could not connect to server），稍后重试推送成功
 
 ## 四、用户的要求与交流偏好
 
@@ -81,7 +81,7 @@
 - AGENTS.md：项目级 Codex 指令文件，写明本项目约定并指向本文件
 - AGENT/AGENT.md：本文件，项目记忆
 
-核对当时（2026-10-15）的状态：工作区干净，main 与 origin/main 同步，共 5 个提交（最新 bd3d86d）。核对后本文件随之更新，本地多出一个提交（提交信息「更新项目记忆：核对仓库现状并修正过期待办」），因当时连不上 GitHub 尚未推送，推送后本地与远程才会再次一致。远程地址为 origin = https://github.com/3591277685/RiealProgram.git
+截至 2026-10-15 核对：仓库共 5 个提交（最新 bd3d86d），工作区干净，main 与 origin/main 同步。核对后本文件的第三节、第五节、第七节、第九节随之更新，提交信息为「更新项目记忆：核对仓库现状并修正过期待办」，已推送成功（具体哈希以 git log 为准）。远程地址为 origin = https://github.com/3591277685/RiealProgram.git
 
 ## 八、Codex 自身记忆机制（2026-10-15 查证）
 
