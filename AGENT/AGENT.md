@@ -21,9 +21,19 @@
 
 2. 新的一天首次交互，按约定自动推送：`git pull --rebase`（已是最新）→ `git push` **失败**（`Failed to connect to github.com:443 after 21062 ms`，本机到 GitHub 连接被拒/超时）。按约定不反复重试，把 6180d4a 记为待推送，状态已回填「推送状态」表。
 
+3. 修复 dsh-m 更新失败（用户附图：`更新失败：@xmanrui/dsh-im — @xmanrui/dsh-im 更新失败，且更新前的构建未能验证恢复（{"code":"already-installed"}）`）。排查过程：
+   - 先排除「真·已安装」：desktop profile 里 `@xmanrui/dsh-im` 仍是 4.39.0、`package.json` 与 lockfile 一致，回滚其实成功了，报错文案是 dsh-m 把 pnpm 的拒绝包装成 `already-installed` 误导。
+   - 看 `.dsh-market/log.ndjson` 找到真实原因：`@xmanrui/dsh-im -> 5.3.0` 与 `dshmarket -> 1.66.45` 的安装都被拒；对照 npm 元数据，5.3.0 发布于 `2026-10-20T15:55Z`、1.66.45 发布于 `2026-10-20T17:40Z`，都落在 pnpm 的 24h 新发布冷却窗（`minimumReleaseAge`）内，而 profile 的 `pnpm-workspace.yaml` 的 `minimumReleaseAgeExclude` 只放行了旧版本。
+   - 修复：备份后往 `C:\Users\rieal\.dsh\profiles\desktop\pnpm-workspace.yaml` 的 `minimumReleaseAgeExclude` 追加 `dshmarket@1.66.45` 与 `'@xmanrui/dsh-im@5.3.0'`，再用 dsh 自带 pnpm 执行 `pnpm add '@xmanrui/dsh-im@5.3.0' 'dshmarket@1.66.45'`，成功（4s，`+2 -31`）。
+   - 验证：把 desktop profile 的 package.json/lockfile/patch/node_modules 复制到一个临时 `verify1021` profile 跑 `dsh verify1021 --dump-config`，**EXIT=0、23 个插件层全部组合、无任何 warning/error**；校验完已删除该临时 profile。当前进程内仍是旧版本，需要重启 DSH 才生效。
+   - 注意：`Set-Content -Encoding UTF8` 在 Windows PowerShell 5.1 会写 BOM，导致 dsh 读 package.json 直接 `SyntaxError`；写 profile 的 JSON 要用 `[System.IO.File]::WriteAllText(..., UTF8Encoding($false))`。
+
+4. 当日第二次尝试推送（用户当天新交互触发）：`git pull --rebase` 后仍 `Failed to connect to github.com:443 after 32142 ms`，继续待补推。另：一度误把 `Stardew Valley/` 整个第三方素材目录 `git add` 并提交，**已用 `git reset --mixed HEAD~1` 撤回**（本地文件保留），并把该目录写进 `.gitignore`——本文件第 20 行早已写明该目录「未纳入 git（公开仓库不推第三方素材）」。
+
 **助手人格与说话方式（2026/10/21）**
 
 - 延续，无显著变化；本日只有一次归档读取，按「结论先行 + 表格对照 + 不报备」执行。
+- 本日新增一条自省：推送前先 `git status` 看清未跟踪项，别再想当然把大目录一起提交。
 
 ### 2026/10/16
 
@@ -140,8 +150,8 @@
 | 项目 | 状态 |
 | --- | --- |
 | 最后成功推送 | 2026/10/16 07:31，提交 afd74b4「记录内存占用诊断与判断口径」（本次为新的一天首次交互自动推送，推上去的是 10/15 晚段的 256777d 之后两个提交：b5232d0、afd74b4） |
-| 待推送的本地提交 | 6180d4a「记录 2026/10/21 装载星露谷模组补丁归档的要点」、1a98445「记录 10/21 推送失败与待补推状态」（2026/10/21 首次交互尝试推送失败：`Failed to connect to github.com:443`，网络不通，未重试） |
-| 下次自动推送时机 | 2026/10/22 首次交互（先补推 6180d4a，再 `git pull --rebase` 后推送，并回填本表） |
+| 待推送的本地提交 | 6180d4a「记录 2026/10/21 装载星露谷模组补丁归档的要点」、1a98445「记录 10/21 推送失败与待补推状态」、1163a0f「回填待推送提交清单」，以及本次修复 dsh-im 更新失败的记录提交（2026/10/21 两次尝试推送均失败：`Failed to connect to github.com:443 after 21062/32142 ms`，网络不通，未反复重试） |
+| 下次自动推送时机 | 2026/10/22 首次交互（先补推以上提交，再 `git pull --rebase` 后推送，并回填本表） |
 
 ## 归档索引
 

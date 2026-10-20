@@ -44,3 +44,5 @@ secrets/
 *.tmp
 *.bak
 ~$*
+# ---- 第三方模组素材（不推公开仓库）----
+Stardew Valley/
