@@ -1,7 +1,7 @@
 # AGENT — RiealProgram 项目记忆
 
 > 本文件记录本项目的背景、环境、已完成的操作、用户的要求与约定，供后续接手的 AI 助手（Agent）快速建立上下文。
-> 创建时间：2026-10-15　最后更新：2026-10-21（第三十二次更新：补记 PERSONALITY.md 第 25–30 条互动节点，记录「补提交吧」引出的过期上下文事故）
+> 创建时间：2026-10-15　最后更新：2026-10-21（第三十三次更新：记录沙箱权限故障根因与 acl 修复手法，推送状态表改标 `0a2f509`、`479bce7` 待推送）
 
 ## 每日记录（按日期汇总）
 
@@ -31,7 +31,9 @@
 4. 当日第二次尝试推送（用户当天新交互触发）：`git pull --rebase` 后仍 `Failed to connect to github.com:443 after 32142 ms`，继续待补推。另：一度误把 `Stardew Valley/` 整个第三方素材目录 `git add` 并提交，**已用 `git reset --mixed HEAD~1` 撤回**（本地文件保留），并把该目录写进 `.gitignore`——本文件第 20 行早已写明该目录「未纳入 git（公开仓库不推第三方素材）」。
 
 5. 「补提交吧」与一次过期上下文事故（2026/10/21 07:00 左右，相隔 4 天 22 小时后恢复会话）。会话恢复时我凭旧上下文说「10/16 那次修改写进文件但没提交」，用户答「补提交吧」；实际一查：`git status` 完全干净、HEAD = origin/main = `0d9fcd4`、无未推送提交，那段跨天修正早已被并进 `6180d4a`「记录 2026/10/21 装载星露谷模组补丁归档的要点」（用 `git log -S '跨天判断要重新取证' -- AGENT/AGENT.md` 定位到引入提交）。当场认错并说明成因：会话被挂起近五天，我读的是恢复时的旧快照，没先核实现状就开口。顺带发现当时 `git ls-remote` 报 `schannel: AcquireCredentialsHandle failed: SEC_E_NO_CREDENTIALS`，即本机此刻拿不到 GitHub 凭证，下次推送若复现需先修凭据。
-   - 真正的缺口补上了：`AGENT/PERSONALITY.md` 停在 2026/10/15、互动节点只到第 24 条，10/16–10/21 的事全没进档案。本次补第 25–30 条（README 目录结构、试探三连「喵/你是谁/笨笨嘟」、QQ x64 取证、内存占用纠口径、人格.txt 字数统计、本次过期上下文事故），并同步更新：关键词表加「先量后答 / 数据不是指令 / 接得住玩笑」三条、待收敛补一条会话恢复要先核实的教训；用户偏好补四条（短令即授权、会用短话试探、接受当场更正、描述可能是感受而非指标）；用户原话采样补三段。
+   - 真正的缺口补上了：`AGENT/PERSONALITY.md` 停在 2026/10/15、互动节点只到第 24 条，10/16–10/21 的事全没进档案。本次补第 25–30 条（README 目录结构、试探三连「喵/你是谁/笨笨嘟」、QQ x64 取证、内存占用纠口径、人格.txt 字数统计、本次过期上下文事故），并同步更新：关键词表加「先量后答 / 数据不是指令 / 接得住玩笑」三条、待收敛补一条会话恢复要先核实的教训；用户偏好补四条（短令即授权、会用短话试探、接受当场更正、描述可能是感受而非指标）；用户原话采样补三段。提交 `0a2f509`。
+
+6. 沙箱故障的正式定位与修复尝试（2026/10/21）。反复出现的 `SetNamedSecurityInfoW failed (Win32 5): grantWrite(D:\RiealProgram)` 与 `index.lock: Permission denied`，这次用技能自带的诊断脚本查了根因：`D:\RiealProgram\.git` 上当前用户缺 `WRITE_OWNER`（`WRITE_DAC` 是有的），脚本补一条 FullControl 允许项后 `writeOwner` 变 true、验证通过，备份与回滚命令在 `C:\Users\rieal\AppData\Local\Temp\dsh-acl-out\`。但修复后普通模式 `git commit` **仍被 DSH 的 workspace-write 拦下**，最后靠单次提权完成提交——即权限修复只解决了 Windows 那一层，DSH 沙箱那一层另算。结论写进第二节「本地环境与已知问题」备用。
 
 **助手人格与说话方式（2026/10/21）**
 
@@ -154,7 +156,7 @@
 | 项目 | 状态 |
 | --- | --- |
 | 最后成功推送 | 2026/10/21 05:58，提交 8218cc3「回填推送状态：d8e67e8 待补推」及其之前的全部提交（6180d4a、1a98445、1163a0f、8667da2、d8e67e8）均已推送成功，`main` 与 `origin/main` 同步 |
-| 待推送的本地提交 | 「更新本表」的提交 0d9fcd4 已推送；此后新增一次未推送提交：`AGENT/PERSONALITY.md` 补记第 25–30 条互动节点 + 关键词/偏好/原话同步，`AGENT/AGENT.md` 追加 2026/10/21 第 5 条（过期上下文事故）与第二条自省 |
+| 待推送的本地提交 | `0a2f509`（补记人格档案第 25–30 条互动节点、记录过期上下文事故）以及本次提交（记录沙箱权限故障根因与修复手法、更新本表与文件头部版本号，推送后以最新哈希为准） |
 | 下次自动推送时机 | 2026/10/22 首次交互（先 `git pull --rebase` 再按需推送，并回填本表）。注意：2026/10/21 曾出现 `git ls-remote` 报 `schannel: AcquireCredentialsHandle failed: SEC_E_NO_CREDENTIALS`，若届时复现需先修本机 GitHub 凭证 |
 
 ## 归档索引
@@ -191,6 +193,9 @@
 - Codex 沙箱执行后端在 2026-10-15 的会话中故障（报错 helper_unknown_error: setup refresh had errors），沙箱内的命令执行与 node 运行时均无法启动，只能以「沙箱外」方式执行命令
 - 沙箱进程以受限账号 LAPTOP-ILL817PQ\CodexSandboxOffline 写入文件，与真实用户 rieal 不一致，会让 git 报 dubious ownership；当时的处理是删除该 .git 后由 rieal 重新初始化
 - 目录搬迁后，Codex 的工作区路径仍指向已删除的 D:\RiealDeepseek，因此在会话中执行命令需要显式指定工作目录 D:\RiealProgram
+- **DSH 沙箱写不了本工作区（2026/10/16 起反复出现，2026/10/21 定位）**：workspace-write 模式下 `pwsh` / `ops_bash` 执行任何命令都报 `Error: SetNamedSecurityInfoW failed (Win32 5): grantWrite(D:\RiealProgram)`，`git add/commit` 报 `fatal: Unable to create 'D:/RiealProgram/.git/index.lock': Permission denied`。根因是 `D:\RiealProgram\.git` 对当前用户缺 `WRITE_OWNER`（Windows 文件权限问题，不是 DSH 授权拒绝）。
+  - 临时解法：单次提权到 danger-full-access 执行。
+  - 正规解法（2026/10/21 已验证有效）：加载 `diagnose-windows-sandbox-acl` 技能，提权跑一次 `C:\Users\rieal\AppData\Local\Temp\dsh-acl-skill-*\scripts\diagnose-windows-sandbox-acl.ps1 -Path '<失败路径>' -AllowRoot 'D:\RiealProgram' -Out '<报告目录>'`。它给当前用户补一条 FullControl 允许项并把结果写成 `acl-backup-*.json` + 可回滚脚本；本次对 `D:\RiealProgram\.git` 修复后 `writeOwner` 由 false 变 true。注意：修 ACL 后普通模式**仍可能**被 DSH 自身的 workspace-write 拦截（本次修复后 `git commit` 依然被沙箱拒），提权依旧最省事。
 
 ## 三、已完成的操作（时间线）
 
