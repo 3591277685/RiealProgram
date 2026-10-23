@@ -1,7 +1,7 @@
 # AGENT — RiealProgram 项目记忆
 
 > 本文件记录本项目的背景、环境、已完成的操作、用户的要求与约定，供后续接手的 AI 助手（Agent）快速建立上下文。
-> 创建时间：2026-10-15　最后更新：2026-10-23（第三十四次更新：新增 2026/10/23 小节，记录 RimWorld 1.7 更新后的调试日志判读、两份安装并存的排查手法；补记 10/21 的身份问答、内存复查与赚钱方向咨询）
+> 创建时间：2026-10-15　最后更新：2026-10-23（第三十五次更新：补记 10/23 的两次神山识检索与角色真结局资料，回填推送状态表——6 个提交待推送、2026/10/23 推送因连不上 github.com:443 失败）
 
 ## 每日记录（按日期汇总）
 
@@ -21,6 +21,15 @@
    - **存量问题（1.6 时代就有，不是升级引起）**：① `Tried to use an uninitialized DefOf of type DutyDefOf` 的完整栈是 `QuestEditor_Library.PawnSpawnData..ctor (PawnSpawnData.cs:483)`，属 Custom Quest Framework 自己的 bug（在 XML 解析阶段碰 DefOf）；② `Could not execute post-long-event action. NullReferenceException` 的栈是 `Graphic_Appearances.get_MatSingle` ← `BuildableDef.ResolveIcon` ← `BuildableDef.PostLoad`，即某个建筑 def 的贴图解析不出来，只影响那个建筑的图标/显示。
    - **噪音（可忽略）**：`Parsed 10.5 as int` 系列（XML 浮点写进 int 字段，被容错截断）、`hideFlags (Object.cs:193): Stub!`（Unity 兼容层空实现）、简中翻译错误条数（19:06 是 948，现在 828，语言包没跟上 1.7）、`[Map Preview] Detected potential conflict` 与 `[MeleeAnim] Potential patch conflicts (15)` 都是提示性而非报错。
    - **全量扫描结论**：199 个有 About.xml 的 mod 里，**109 个没有声明支持 1.7**（最高只到 1.6）。建议两条路：① Steam 属性 → 测试版回退 1.6；② 留在 1.7 就先停用 Rigor Mortis 与 RimCrow Companion 再观察。用户尚未选择。
+
+2. 神山识资料检索（按每日检索要求，今日首次交互，共两次）。
+
+   - 第一次：`神山识 Summer Pockets 角色 设定 性格 台词` + `神山識 Summer Pockets ルート 一人称 口癖 名言`；第二次：`神山识 性格 口癖 鬼 传说 结局 慰灵碑 七影蝶`。均走 `web_search`（Firecrawl 返回结果，可读摘要）。
+   - 新得信息：三围 73/54/74、喜欢御结饭团；真结局中她与羽依里成为「鬼姬」改变历史，事后留在时间夹缝（青蓝世界）为迷惘的七影蝶指路，慰灵碑刻的是「鬼姬神山识之镇魂碑」；她的指引牵出鸥、紬、苍、白羽各自的结局，RB 延伸结局里找回徘徊的羽未算作报恩；相关外传有小说〈おむすびの導き〉、VA 小游戏后日谈、动画彩蛋。
+   - 已补进 `AGENT/PERSONALITY.md` 第八节（新增「2026/10/23 检索补记」表 + 可借用质地第 7–9 条 + 每日检索记录行）。来源性质：百度百科、萌娘百科、巴哈姆特创作大厅与哈拉区、note、fc2、知乎、YouTube 实况——**二手转述与玩家解读，非 Key 官方原文**，已在文件里标注。
+   - 未查到：Key 官网角色页原文、官方设定集、完整口癖清单。
+
+3. 按「新的一天首次交互」自动推送：`git pull --rebase` 显示已是最新，`git push` **失败**（`Failed to connect to github.com:443 after 21096 ms`）。按约定不反复重试，6 个待推送提交已回填「推送状态」表。
 
 **助手人格与说话方式（2026/10/23）**
 
@@ -191,8 +200,9 @@
 | 项目 | 状态 |
 | --- | --- |
 | 最后成功推送 | 2026/10/21 05:58，提交 8218cc3「回填推送状态：d8e67e8 待补推」及其之前的全部提交（6180d4a、1a98445、1163a0f、8667da2、d8e67e8）均已推送成功，`main` 与 `origin/main` 同步 |
-| 待推送的本地提交 | `0a2f509`（补记人格档案第 25–30 条互动节点、记录过期上下文事故）以及本次提交（记录沙箱权限故障根因与修复手法、更新本表与文件头部版本号，推送后以最新哈希为准） |
-| 下次自动推送时机 | 2026/10/22 首次交互（先 `git pull --rebase` 再按需推送，并回填本表）。注意：2026/10/21 曾出现 `git ls-remote` 报 `schannel: AcquireCredentialsHandle failed: SEC_E_NO_CREDENTIALS`，若届时复现需先修本机 GitHub 凭证 |
+| 待推送的本地提交 | 6 个：`0a2f509`（补记人格档案第 25–30 条互动节点、记录过期上下文事故）、`c48c474`（沙箱权限故障根因与修复手法）、`2e7476a`（每日神山识检索要求 + 第八节角色原型档案）、`c2ef13e`（章节编号笔误修正）、`1fbff68`（全局新增人格扮演要求）、`026cbe3`（2026/10/23 小节）以及本次补记提交（推送后以最新哈希为准） |
+| 推送失败记录 | 2026/10/23 19:2x 按「新的一天首次交互」自动推送：`git pull --rebase` 显示已是最新，`git push` 报 `fatal: unable to access 'https://github.com/3591277685/RiealProgram.git/': Failed to connect to github.com:443 after 21096 ms: Could not connect to server`。按约定不反复重试，留待下次时机补推 |
+| 下次自动推送时机 | 2026/10/24 首次交互（先 `git pull --rebase` 再推送，并回填本表）。注意：2026/10/21 曾出现 `git ls-remote` 报 `schannel: AcquireCredentialsHandle failed: SEC_E_NO_CREDENTIALS`；2026/10/23 是 TCP 连不上 443，若复现需先查网络与代理设置，不是凭证问题 |
 
 ## 归档索引
 
