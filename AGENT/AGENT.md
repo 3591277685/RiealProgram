@@ -1,11 +1,31 @@
 # AGENT — RiealProgram 项目记忆
 
 > 本文件记录本项目的背景、环境、已完成的操作、用户的要求与约定，供后续接手的 AI 助手（Agent）快速建立上下文。
-> 创建时间：2026-10-15　最后更新：2026-10-21（第三十三次更新：记录沙箱权限故障根因与 acl 修复手法，推送状态表改标 `0a2f509`、`479bce7` 待推送）
+> 创建时间：2026-10-15　最后更新：2026-10-23（第三十四次更新：新增 2026/10/23 小节，记录 RimWorld 1.7 更新后的调试日志判读、两份安装并存的排查手法；补记 10/21 的身份问答、内存复查与赚钱方向咨询）
 
 ## 每日记录（按日期汇总）
 
 > 依据全局指令「日期标注要求」：每天单独成节，同一天的内容追加到本日小节内。
+
+### 2026/10/23
+
+**完成的操作**
+
+1. RimWorld 调试日志判读（用户发 RimWorld 内置 Debug log 截图 + 三个字「有问题吗」）。
+
+   - **先定位到底是哪一份装在跑**：本机有两份 RimWorld。实际运行的是 Steam 版 `D:\steam\steamapps\common\RimWorld`，版本 **1.7.4985 rev1269**（这一版是 .NET / Vulkan 移植版，dll 直接放在根目录：`Assembly-CSharp.dll`、`RimWorld.dll`、`Brutal.*`、`Waylith.*`，还有 `cream_api.ini`）；另一份 `D:\riealgame\GBL\rimworld` 是旧的 **1.6.4850 rev645**（exe 停在 2026/6/7）。mod 来源：Steam 创意工坊 `D:\steam\steamapps\workshop\content\294100`（199 个）+ 本地 `Mods\_Link_RimCrowCompanion`（junction → `D:\riealgame\RimCrow\toolmods\RimCrowCompanion`）。`Config\ModsConfig.xml` 里 activeMods 共 210 项。
+   - **时间线（关键）**：`D:\steam\steamapps\appmanifest_294100.acf` 的 `LastUpdated` = **2026/10/23 19:10:59**（buildid 26115268），`LastPlayed` = 19:22:07。19:06 那次运行还是 1.6（旧日志 `RimCrow_Realtime-prev.log` 里还是 1.6 的 mod 行为），19:22 是升级到 1.7 后的第一次启动 —— 这就是「日志突然变吵」的根因。
+   - 截图第 1 行之谜：在 1.7 的 `D:\steam\steamapps\common\RimWorld\Assembly-CSharp.dll` 里按 UTF-16 搜到原句 `needs to have <downloadUrl> and/or <steamWorkshopUrl> specified`。即 `rimcrow.companion` 的 `About\About.xml` 里 Harmony 那条 `<modDependencies>` 只写了 `packageId` + `displayName`，缺 downloadUrl / steamWorkshopUrl → **1.7 新增的元数据校验警告，功能无害**（Harmony 本来就排在加载列表第 1 位）。
+   - **真问题一**：`Error while instantiating a mod of type RimCrowCompanion.RimCrowCompanionMod`。证据链：19:06（1.6）时它的 `RimCrowCompanionMod.LogWarningPrefix` → `Log.Warning_Patch1` 还在每条警告的栈顶正常工作；19:22（1.7）本次 `RimCrow_Realtime.log` 是 **0 字节**，说明它的日志器根本没起来。它的 About.xml：packageId `rimcrow.companion`、modVersion `0.3.12`、`supportedVersions` 只写 1.5/1.6。截图行尾被截断看不到异常类型，按版本推断是 1.7 API 不兼容。
+   - **真问题二**：`Error in static constructor of RigorMortis.HarmonyInit: TypeInitializationException`。Rigor Mortis = packageId `fxz.moelotlzombie.update`（工坊 3454053400），`supportedVersions` 同样只写 1.5/1.6，且 `loadAfter` 里写了没安装的 `ninedaylongbow.ChineseComprehensiveExpansion`。现状：mod 加载了但 Harmony 补丁没打上，半死状态。
+   - **存量问题（1.6 时代就有，不是升级引起）**：① `Tried to use an uninitialized DefOf of type DutyDefOf` 的完整栈是 `QuestEditor_Library.PawnSpawnData..ctor (PawnSpawnData.cs:483)`，属 Custom Quest Framework 自己的 bug（在 XML 解析阶段碰 DefOf）；② `Could not execute post-long-event action. NullReferenceException` 的栈是 `Graphic_Appearances.get_MatSingle` ← `BuildableDef.ResolveIcon` ← `BuildableDef.PostLoad`，即某个建筑 def 的贴图解析不出来，只影响那个建筑的图标/显示。
+   - **噪音（可忽略）**：`Parsed 10.5 as int` 系列（XML 浮点写进 int 字段，被容错截断）、`hideFlags (Object.cs:193): Stub!`（Unity 兼容层空实现）、简中翻译错误条数（19:06 是 948，现在 828，语言包没跟上 1.7）、`[Map Preview] Detected potential conflict` 与 `[MeleeAnim] Potential patch conflicts (15)` 都是提示性而非报错。
+   - **全量扫描结论**：199 个有 About.xml 的 mod 里，**109 个没有声明支持 1.7**（最高只到 1.6）。建议两条路：① Steam 属性 → 测试版回退 1.6；② 留在 1.7 就先停用 Rigor Mortis 与 RimCrow Companion 再观察。用户尚未选择。
+
+**助手人格与说话方式（2026/10/23）**
+
+- 无明显变化。用户这次只给截图 + 三个字「有问题吗」，回答按「结论先行 → 逐条判读 → 可执行清单」组织。
+- 新增一条手法记录：诊断 mod 问题先确认**哪一份安装在跑**（本机两份 RimWorld，1.6 与 1.7 并存，光看日志里的路径会误判），再用 Steam `appmanifest_*.acf` 的 `LastUpdated` 对齐时间线，比凭报错猜原因可靠得多。
 
 ### 2026/10/21
 
@@ -49,6 +69,12 @@
 - 延续，无显著变化；本日只有一次归档读取，按「结论先行 + 表格对照 + 不报备」执行。
 - 本日新增一条自省：推送前先 `git status` 看清未跟踪项，别再想当然把大目录一起提交。
 - 本日第二条自省（更重）：会话隔了几天恢复时，先核实当前状态再开口，别凭旧上下文断言"还没提交"。这次是用户一句「补提交吧」把我逼到 `git status` 前，才发现根本没东西可提交。
+
+9. 身份与状态问答若干轮（10/21 上午，模型在 deepseek / combo / glm / mimo / longcat 之间多次切换）：用户重复问「你是谁呀」，统一答「识」；问「笨蛋吗」时认账，并当场修掉本文件里把人格档案写成「第九节」的笔误（实为第八节，提交 `c2ef13e`）；「在干嘛」答空闲待命。
+
+10. 内存占用复查（用户原话：「我的内存占用率正常吗」）：总 16,011 MB、可用 6,743 MB、使用中 9,268 MB = **57.9%**、已提交 12,534/26,497 MB（47.3%）、待命 6,029 MB、空闲+零 714 MB、页面文件用 355 MB、内存压缩 374 MB、开机 123.3 小时 → 正常、无压力；占用大头 DeepSeek Harness 9 进程 2,250 MB、svchost 92 实例 1,861 MB、msedge 7 进程 536 MB、explorer 330 MB。建议闲时重启一次（已开机 5 天）但不急。注意：普通权限下 `Get-CimInstance Win32_OperatingSystem` 与 `Win32_PerfFormattedData_PerfOS_Memory` 报 `PermissionDenied (0x80041003)`，读内存数据必须先提权。
+
+11. 赚钱方向咨询（用户原话：「有什么赚钱的好方法」；用 ask_user_question 收集到两条约束：「只要有本金也能做的」「没限制，就是想搞钱」）。盘点本地可变现资产：星露谷模组 57 个 C# 源码 3,719 行 / 目录 7.7 MB、`dsh-global-agent-md` 插件 v0.2.0、Adobe After Effects 2023 + Premiere Pro 2024、VS 生成工具 2022、Python 3.10.4（`D:\python\python3.10.4\python.exe`）。给出按单位时间收入的排序：模组/汉化定制单 > 视频剪辑接单（AE/PR 稀缺、天花板高）> 技术外包 > DSH 插件上架（收入≈捐赠）> 自媒体（慢）> 倒卖（压货风险）> 量化投资（散户多数亏、最危险）。核心建议：**先卖已经做出来的东西，把作品变成报价单；投钱方向当学费小额试**。**用户尚未选定方向**（待办）。
 
 ### 2026/10/16
 
