@@ -1,0 +1,82 @@
+﻿
+Name                                   MB  Files LastWrite 
+----                                   --  ----- --------- 
+Wuthering Waves                  110502.6   6904 2026-10-16
+riealgame                         42041.4 421617 2026-09-16
+xwechat_files                     41776.9   3097 2026-02-22
+Delta Force                       29941.4   2115 2026-10-27
+桌面                                19506.9   5311 2026-10-26
+PCL                               10433.6  42503 2026-09-15
+pr                                 8009.8  21445 2026-09-19
+steam                                7863  80417 2026-10-23
+b3b517b88327375aa46f4854bf3d8ec5   6218.6   6255 2026-10-16
+Ultimate Vocal Remover               5348    559 2026-01-27
+文档                                 5306.7  21120 2026-10-15
+Program Files                        5266   2130 2026-09-19
+Quark                              5203.1   7048 2026-10-24
+AE                                 3148.1   5671 2025-07-14
+图片                                   1942   2306 2026-10-27
+python                             1591.4  14450 2025-02-26
+LenovoSoftstore                    1589.2   6889 2024-10-14
+Godot                              1316.9    323 2025-08-16
+IMao                               1018.2    372 2025-07-20
+qq                                 1009.9   1785 2026-01-01
+Weixin                              881.5     31 2026-09-15
+aseprite-build                      865.5  18103 2026-10-12
+Arctime pro                         836.2   1185 2025-03-30
+fans                                815.8   1021 2025-10-16
+livehime                              767   1336 2026-08-21
+vm                                  733.3    234 2025-03-05
+GameVideos                          562.3     18 2026-09-14
+HBuilderX                           431.3  13559 2024-12-11
+LeAppStore                          316.5     98 2025-04-22
+bilibili                            297.2    103 2025-12-01
+Program Files (x86)                 291.3      1 2025-07-07
+FlashCenter                         266.4    118 2025-02-21
+YunX-Desktop                        220.2    241 2026-10-26
+ToDesk                              164.7     37 2026-02-18
+IObit Uninstaller                   140.6    209 2026-10-15
+简易光标制作软件0.0.1.17                      130    152 2025-07-01
+TSBrowserDownloads                  105.6      1 2024-10-14
+Clash                                 105     19 2025-03-28
+node-v24.14.0-win-x64                  98   1840 2026-02-24
+huorong                              80.4    111 2024-10-22
+PalmInput                            71.2     42 2024-10-14
+360Downloads                         69.5      3 2025-11-24
+WeGameApps                           24.4      2 2025-07-17
+BaiduNetdiskDownload                 13.6      1 2026-10-10
+RiealProgram                         11.5   1287 2026-10-21
+LeStoreDownload                      10.5      1 2026-10-27
+7-Zip                                 5.6    107 2025-06-17
+视频                                    2.6      4 2026-10-01
+Tenxunhuiyi                           1.1      1 2024-12-23
+.pnpm-store                           0.2     39 2026-10-15
+ProgramData                           0.2      3 2025-09-25
+码字                                      0      0 2024-12-27
+下载                                      0      1 2026-10-26
+xuexitong                               0      0 2026-10-10
+米西                                      0      0 2025-06-17
+WeChat                                  0      0 2025-09-23
+WeGame                                  0      2 2024-10-17
+音乐                                      0      1 2025-12-29
+Games                                   0      0 2025-09-07
+GamePP Wonderful Moment                 0      0 2026-01-01
+leidian                                 0      0 2025-09-08
+jxydt                                   0      0 2025-04-15
+epic                                    0      0 2026-09-18
+AppData                                 0      0 2024-10-18
+.leigod                                 0      2 2026-03-13
+cxdownload                              0      1 2026-06-16
+BiliGame                                0      0 2025-08-08
+QLDownloadGame                          0      0 2026-03-16
+QLDownload                              0      0 2025-11-02
+System Volume Information               0      0 2026-10-17
+rail_user_data                          0      0 2025-05-08
+Photoshop                               0      0 2025-03-28
+Neat Download Manager                   0      0 2024-10-22
+msdownld.tmp                            0      0 2024-10-23
+$RECYCLE.BIN                            0     36 2025-03-30
+Netease                                 0      0 2025-03-28
+
+
+
